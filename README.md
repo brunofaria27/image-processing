@@ -1,4 +1,4 @@
-## Explicação dos códigos
+## Documentação dos códigos
 
 Para fazer a primeira parte do projeto:
 
@@ -17,7 +17,7 @@ Para fazer a primeira parte do projeto:
 
 3. Implemente a funcionalidade de leitura e exibição das imagem com opção de zoom. ✅
   - Arquivo [app/gui.py](https://github.com/brunofaria27/image-processing/blob/main/src/app/gui.py)
-  - Para a interface foi usado `tkinter` onde criou-se uma classe com todas importantes funções que a interface deve ter, além disso tem-se as funções que devem ser chamadas ao clicar nos itens do `Menu` para fazer todas as funcionalidades acima [2]
+  - Para a interface foi usado `tkinter` onde criou-se uma classe com todas importantes funções que a interface deve ter, além disso tem-se as funções que devem ser chamadas ao clicar nos itens do `Menu` para fazer todas as funcionalidades acima [2].
 
 4. Implemente a funcionalidade de segmentação dos núcleos. Compare o resultado medindo a distância entre o centro do núcleo segmentado e o que está na planilha. ❌
 ------------------------
