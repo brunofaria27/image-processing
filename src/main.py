@@ -5,7 +5,7 @@ import tkinter
 
 if __name__ == "__main__":
     # Iniciar a interface gráfica
-    # app = Application(tkinter.Tk(), "Aplicativo de Processamento de Imagens")
+    app = Application(tkinter.Tk(), "Aplicativo de Processamento de Imagens")
 
     # Iniciar o processamento de imagem em segundo plano
-    image_processing_main()
+    # image_processing_main()

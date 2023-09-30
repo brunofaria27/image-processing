@@ -146,6 +146,3 @@ class Application:
         self.photo = ImageTk.PhotoImage(image=Image.fromarray(resized_img))
         self.canvas.create_image(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
-
-# Criar uma janela e passá-la para a classe Application
-App = Application(tk.Tk(), "Aplicativo de Processamento de Imagens")
