@@ -1,5 +1,5 @@
 # Pré-processamento das imagens
-/images-processed
+src/images-processed
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
