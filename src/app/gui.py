@@ -30,6 +30,12 @@ class Application:
         self.menu.add_cascade(label="Arquivo", menu=self.file_menu)
         self.file_menu.add_command(label="Abrir", command=self.load_image)
 
+        # Adicionar uma entrada para o valor de N
+        self.n_label = tk.Label(self.window, text="Valor de N:")
+        self.n_label.pack()
+        self.n_entry = tk.Entry(self.window)
+        self.n_entry.pack()
+
         self.options_menu = tk.Menu(self.menu)
         self.menu.add_cascade(label="Opções", menu=self.options_menu)
         self.options_menu.add_command(label="Segmentar núcleos", command=self.segmentation)
@@ -63,11 +69,14 @@ class Application:
         self.photo = None
 
         # Inicializar variáveis de texto
+        self.error_n_label = tk.Label(self.image_frame, text="")
+        self.error_n_label.grid(row=2, column=0, pady=10)
+
         self.text_label = tk.Label(self.image_frame, text="")
-        self.text_label.grid(row=2, column=0, pady=10)
+        self.text_label.grid(row=3, column=0, pady=10)
 
         self.filename_label = tk.Label(self.image_frame, text="")
-        self.filename_label.grid(row=3, column=0)
+        self.filename_label.grid(row=4, column=0)
 
         # Iniciar o loop da janela TKinter
         self.window.mainloop()
@@ -77,7 +86,15 @@ class Application:
         Abrir um campo para digitar N, para segmentar a imagem no tamanho desejado.
         Usuário pode usar o padrão = 199. Crie um botão que seja padrão.
         """
-        print('Segmentar os núcleos das células contidas nas imagens e recortar uma região NxN ao redor do centro do núcleo. A princípio N=100, mas pode ser alterado.')
+        try:
+            self.error_n_label.config(text="")
+            n_value = int(self.n_entry.get())
+        except (ValueError, UnboundLocalError):
+            self.error_n_label.config(text="Você não inseriu N, valor a ser considerado = 100")
+            n_value = 100
+        finally:
+            # TODO: Tratar essa condição idependentemente do erro. 
+            print(f'Segmentar os núcleos com N = {n_value}')
 
     def characterize(self):
         print('Caracterizar o núcleo através de descritores de forma.')
@@ -86,14 +103,17 @@ class Application:
         print('Classificar cada núcleo encontrado na imagem.')
 
     def load_image(self):
+        '''
+        Configuração da entrada da imagem.
+            - Aplicar funcionalidade de zoom
+            - Mostrar o nome do arquivo
+        '''
         # Abrir o seletor de arquivos
         file_path = filedialog.askopenfilename()
 
         if file_path:
-            # Ler a imagem usando OpenCV
             self.cv_img = cv2.cvtColor(cv2.imread(file_path), cv2.COLOR_BGR2RGB)
 
-            # Obter o nome do arquivo da imagem
             filename = file_path.split("/")[-1]
 
             # Atualizar os textos das seleções do arquivo
@@ -103,10 +123,8 @@ class Application:
             # Criar uma imagem TKinter a partir da imagem OpenCV
             self.photo = ImageTk.PhotoImage(image=Image.fromarray(self.cv_img))
 
-            # Adicionar a imagem ao canvas
             self.canvas.create_image(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
 
-            # Configurar o tamanho da imagem para ser responsivo
             self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
             # Adicionar eventos de zoom
