@@ -44,7 +44,6 @@ class ImageProcessor:
 
                 image_path = os.path.join(self.image_dir, image_filename)
 
-                # Trata a condição de não ter todas images disponiveis
                 if os.path.exists(image_path):
                     image = cv2.imread(image_path)
 
@@ -52,28 +51,31 @@ class ImageProcessor:
                         x_center = nucleus_x
                         y_center = nucleus_y
 
-                        # Garante que o recorte esteja sempre centrado no núcleo
                         x1 = x_center - self.image_size // 2
                         x2 = x1 + self.image_size
                         y1 = y_center - self.image_size // 2
                         y2 = y1 + self.image_size
 
-                        # Ajusta as coordenadas do recorte se estiverem fora dos limites da imagem
                         if x1 < 0:
-                            x2 -= x1
                             x1 = 0
                         if y1 < 0:
-                            y2 -= y1
                             y1 = 0
                         if x2 > image.shape[1]:
-                            x1 -= (x2 - image.shape[1])
                             x2 = image.shape[1]
                         if y2 > image.shape[0]:
-                            y1 -= (y2 - image.shape[0])
                             y2 = image.shape[0]
 
-                        # Recorta a imagem usando as coordenadas ajustadas
                         sub_image = image[y1:y2, x1:x2]
+
+                        if sub_image.shape[0] != self.image_size or sub_image.shape[1] != self.image_size:
+                            temp_image = np.full((self.image_size, self.image_size, 3), 255, dtype=np.uint8)
+                            
+                            # Ajusta a posição do preenchimento com base na direção em que a imagem fugiu dos limites
+                            dx = self.image_size - sub_image.shape[1]
+                            dy = self.image_size - sub_image.shape[0]
+                            
+                            temp_image[dy:dy+sub_image.shape[0], dx:dx+sub_image.shape[1]] = sub_image
+                            sub_image = temp_image
 
                         class_dir = os.path.join(self.output_dir, bethesda_system)
                         output_filename = f"{cell_id}.png"
@@ -81,7 +83,7 @@ class ImageProcessor:
                         cv2.imwrite(output_path, sub_image)
         except Exception as e:
             raise Exception(f'Erro ao criar sub imagens: {str(e)}')
-        
+
 def main():
     image_processor = ImageProcessor(image_dir=IMAGE_DIR, output_dir=OUTPUT_DIR, image_size=100)
     image_processor.create_folders_classes(classes=CLASSES)
