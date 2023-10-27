@@ -3,14 +3,6 @@ import csv
 import cv2
 import numpy as np
 
-# Diretórios
-IMAGE_DIR = 'D:\GitHub\image-processing\src\images'
-OUTPUT_DIR = 'D:\GitHub\image-processing\src\images-processed'
-CSV_FILE = 'D:\GitHub\image-processing\src\data\classifications.csv'
-
-# Classes
-CLASSES = ['Negative for intraepithelial lesion', 'ASC-US', 'ASC-H', 'LSIL', 'HSIL', 'SCC']
-
 class ImageProcessor:
     def __init__(self, image_dir, output_dir, image_size):
         self.image_dir = image_dir
@@ -85,6 +77,14 @@ class ImageProcessor:
             raise Exception(f'Erro ao criar sub imagens: {str(e)}')
 
 def main():
+    # Diretórios
+    IMAGE_DIR = 'D:\GitHub\image-processing\src\images'
+    OUTPUT_DIR = 'D:\GitHub\image-processing\src\images-processed'
+    CSV_FILE = 'D:\GitHub\image-processing\src\data\classifications.csv'
+
+    # Classes
+    CLASSES = ['Negative for intraepithelial lesion', 'ASC-US', 'ASC-H', 'LSIL', 'HSIL', 'SCC']
+    
     image_processor = ImageProcessor(image_dir=IMAGE_DIR, output_dir=OUTPUT_DIR, image_size=100)
     image_processor.create_folders_classes(classes=CLASSES)
     image_processor.processing_images(csv_name=CSV_FILE)
