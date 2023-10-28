@@ -38,4 +38,4 @@ def draw_rectangles(image_name, csv_path, image_folder, segmented_folder, N):
         print(cell_data_json)
 
 # Chame a função para processar a imagem
-draw_rectangles('2cefdbf695da71852337ae3557ccdd38.png', '../../data/classifications.csv', '../../images', 'segmented-gui-cells', 100)
+draw_rectangles('2cefdbf695da71852337ae3557ccdd38.png', '../../data/classifications.csv', '../../fodas', 'segmented-gui-cells', 100)
