@@ -78,9 +78,9 @@ class ImageProcessor:
 
 def main():
     # Diretórios
-    IMAGE_DIR = 'D:\GitHub\image-processing\src\images'
-    OUTPUT_DIR = 'D:\GitHub\image-processing\src\images-processed'
-    CSV_FILE = 'D:\GitHub\image-processing\src\data\classifications.csv'
+    IMAGE_DIR = 'E:\GitHub Projects\image-processing\src\images'
+    OUTPUT_DIR = 'E:\GitHub Projects\image-processing\src\images-processed'
+    CSV_FILE = 'E:\GitHub Projects\image-processing\src\data\classifications.csv'
 
     # Classes
     CLASSES = ['Negative for intraepithelial lesion', 'ASC-US', 'ASC-H', 'LSIL', 'HSIL', 'SCC']
