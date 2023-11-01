@@ -1,5 +1,6 @@
 import cv2
 import tkinter as tk
+
 from tkinter import filedialog, ttk
 from PIL import Image, ImageTk
 
@@ -84,7 +85,7 @@ class Application:
     def segmentation(self):
         """
         Abrir um campo para digitar N, para segmentar a imagem no tamanho desejado.
-        Usuário pode usar o padrão = 199. Crie um botão que seja padrão.
+        Usuário pode usar o padrão = 100.
         """
         try:
             self.error_n_label.config(text="")
@@ -93,8 +94,9 @@ class Application:
             self.error_n_label.config(text="Você não inseriu N, valor a ser considerado = 100")
             n_value = 100
         finally:
-            # TODO: Tratar essa condição idependentemente do erro. 
-            print(f'Segmentar os núcleos com N = {n_value}')
+            # TODO: Aplicar para a imagem que vai ser inserida, ou seja: recortar a imagem que vai ser inserida (Buscar no CSV)
+            # TODO: INSERIR IMAGEM -> RECORTAR CELULAS DA IMAGEM -> SEGMENTAR AS CELULAS -> MOSTRAR PARA O USUARIO (PLOTAR OU COLOCAR NA INTERFACE)
+            pass
 
     def characterize(self):
         print('Caracterizar o núcleo através de descritores de forma.')
