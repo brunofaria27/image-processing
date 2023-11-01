@@ -1,5 +1,6 @@
 # Pré-processamento das imagens
 src/images-processed
+src/segmented-images
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
