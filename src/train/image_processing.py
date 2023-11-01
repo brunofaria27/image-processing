@@ -85,7 +85,7 @@ def main():
     # Classes
     CLASSES = ['Negative for intraepithelial lesion', 'ASC-US', 'ASC-H', 'LSIL', 'HSIL', 'SCC']
     
-    image_processor = ImageProcessor(image_dir=IMAGE_DIR, output_dir=OUTPUT_DIR, image_size=100)
+    image_processor = ImageProcessor(image_dir=IMAGE_DIR, output_dir=OUTPUT_DIR, image_size=200)
     image_processor.create_folders_classes(classes=CLASSES)
     image_processor.processing_images(csv_name=CSV_FILE)
 
