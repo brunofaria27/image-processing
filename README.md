@@ -2,7 +2,7 @@
 
 Para fazer a primeira parte do projeto:
 
-1. Os dados usados no treinamento e teste dos classificadores e do segmentador devem ser preprocessados. Através da planilha classifications.csv, obtenha as coordenadas dos núcleos das células das imagens disponíveis no dataset (apenas uma parte das imagens está disponível). Recorte as imagens, gerando uma sub-imagem 100x100 para cada núcleo e armazene em sub-diretórios de acordo com a sua classe. O nome da imagem deve ser o número da célula na planilha. ✅
+1. Os dados usados no treinamento e teste dos classificadores e do segmentador devem ser preprocessados. Através da planilha classifications.csv, obtenha as coordenadas dos núcleos das células das imagens disponíveis no dataset (apenas uma parte das imagens está disponível). Recorte as imagens, gerando uma sub-imagem 100x100 para cada núcleo e armazene em sub-diretórios de acordo com a sua classe. O nome da imagem deve ser o número da célula na planilha.
   - Arquivo [app/image_processing.py](https://github.com/brunofaria27/image-processing/blob/main/src/app/image_processing.py) 
   - ***Criar as pastas:*** na função `create_folders_classes` para armazenar as imagens segmentadas em **100x100** ou como o usuário desejar em **NxN** (se passado por parametro).
   - ***Leitura do arquivo:*** na função `processing_images` faz-se a leitura do arquivo como um Dicionário para que as colunas sejam as chaves e chama-se a função `processing_image_scale` onde o código irá iterar sobre cada linha do CSV.
@@ -10,16 +10,16 @@ Para fazer a primeira parte do projeto:
   - ***Tratamento da dimensão:*** bastou fazer `if's` para testar se o limite foi superado para algum lado, se caso fosse você teria que puxar o recorte para o outro lado com a quantidade de pixels faltantes, assim o recorte ficaria sempre correto.
 
 2. Implemente um ambiente totalmente gráfico com um menu para as seguintes funcionalidades:
- - Ler e visualizar imagens nos formatos PNG e JPG. As imagens podem ter qualquer resolução. ✅
- - Segmentar os núcleos das células contidas nas imagens e recortar uma região NxN ao redor do centro do núcleo. A princípio N=100, mas pode ser alterado. ❌
- - Caracterizar o núcleo através de descritores de forma. ❌
- - Classificar cada núcleo encontrado na imagem. ❌
+ - Ler e visualizar imagens nos formatos PNG e JPG. As imagens podem ter qualquer resolução.
+ - Segmentar os núcleos das células contidas nas imagens e recortar uma região NxN ao redor do centro do núcleo. A princípio N=100, mas pode ser alterado.
+ - Caracterizar o núcleo através de descritores de forma.
+ - Classificar cada núcleo encontrado na imagem.
 
-3. Implemente a funcionalidade de leitura e exibição das imagem com opção de zoom. ✅
+3. Implemente a funcionalidade de leitura e exibição das imagem com opção de zoom.
   - Arquivo [app/gui.py](https://github.com/brunofaria27/image-processing/blob/main/src/app/gui.py)
   - Para a interface foi usado `tkinter` onde criou-se uma classe com todas importantes funções que a interface deve ter, além disso tem-se as funções que devem ser chamadas ao clicar nos itens do `Menu` para fazer todas as funcionalidades acima [2].
 
-4. Implemente a funcionalidade de segmentação dos núcleos. Compare o resultado medindo a distância entre o centro do núcleo segmentado e o que está na planilha. ❌
+4. Implemente a funcionalidade de segmentação dos núcleos. Compare o resultado medindo a distância entre o centro do núcleo segmentado e o que está na planilha.
 ------------------------
 ## CRIC Cervix Cell Classification - [CSV Description](https://github.com/brunofaria27/image-processing/blob/main/src/data/classifications.csv)
 
