@@ -101,7 +101,6 @@ class Application:
             segmented_image = draw_rectangles('2cefdbf695da71852337ae3557ccdd38.png', '../src/data/classifications.csv', '../src/images', 'segmented-gui-cells', 100)
             self.update_canvas_with_segmented_image(segmented_image)
 
-
     def characterize(self):
         print('Caracterizar o núcleo através de descritores de forma.')
     
