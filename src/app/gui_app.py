@@ -4,6 +4,8 @@ import tkinter as tk
 from tkinter import filedialog, ttk
 from PIL import Image, ImageTk
 
+from app.draw_rectangles_app import draw_rectangles
+
 class Application:
     def __init__(self, window, window_title):
         self.window = window
@@ -96,13 +98,21 @@ class Application:
         finally:
             # TODO: Aplicar para a imagem que vai ser inserida, ou seja: recortar a imagem que vai ser inserida (Buscar no CSV)
             # TODO: INSERIR IMAGEM -> RECORTAR CELULAS DA IMAGEM -> SEGMENTAR AS CELULAS -> MOSTRAR PARA O USUARIO (PLOTAR OU COLOCAR NA INTERFACE)
-            pass
+            segmented_image = draw_rectangles('2cefdbf695da71852337ae3557ccdd38.png', '../src/data/classifications.csv', '../src/images', 'segmented-gui-cells', 100)
+            self.update_canvas_with_segmented_image(segmented_image)
+
 
     def characterize(self):
         print('Caracterizar o núcleo através de descritores de forma.')
     
     def classification(self):
         print('Classificar cada núcleo encontrado na imagem.')
+
+    def update_canvas_with_segmented_image(self, segmented_image):
+        self.cv_img = segmented_image
+        self.photo = ImageTk.PhotoImage(image=Image.fromarray(self.cv_img))
+        self.canvas.create_image(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
     def load_image(self):
         '''

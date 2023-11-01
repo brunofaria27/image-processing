@@ -13,7 +13,7 @@ def draw_rectangles(image_name, csv_path, image_folder, segmented_folder, N):
 
         for idx, row in group.iterrows():
             x, y = row['nucleus_x'], row['nucleus_y']
-            cv2.rectangle(img, (x - N // 2, y - N // 2), (x + N // 2, y + N // 2), (0, 255, 0), 2)
+            cv2.rectangle(img, (x - N // 2, y - N // 2), (x + N // 2, y + N // 2), (255, 0, 0), 2)
 
             cell_data.append({
                 'x': x,
@@ -21,11 +21,10 @@ def draw_rectangles(image_name, csv_path, image_folder, segmented_folder, N):
                 'label': idx  # Usar o índice como rótulo
             })
 
-            cv2.putText(img, str(idx), (x - N // 2, y - N // 2 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
+            cv2.putText(img, str(idx), (x - N // 2, y - N // 2 - 10), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.75, (255, 0, 0), 2)
 
         cv2.imwrite(f'{segmented_folder}/{image_name}_cells_segmented.png', img)
 
-        cell_data_json = json.dumps(cell_data, indent=4)
-        print(cell_data_json)
+        return img
 
-draw_rectangles('2cefdbf695da71852337ae3557ccdd38.png', '../../data/classifications.csv', '../../fodas', 'segmented-gui-cells', 100)
+# draw_rectangles('2cefdbf695da71852337ae3557ccdd38.png', '../data/classifications.csv', '../images', 'segmented-gui-cells', 100)
