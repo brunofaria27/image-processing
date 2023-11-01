@@ -67,6 +67,10 @@ class Application:
         self.scrollbar_h.config(command=self.canvas.xview)
         self.scrollbar_v.config(command=self.canvas.yview)
 
+        # VARIAVEIS IMPORTANTES
+        self.file_selected = None
+        self.json_info_nucleus = None
+
         # Inicializar a imagem como None
         self.cv_img = None
         self.photo = None
@@ -98,7 +102,7 @@ class Application:
         finally:
             # TODO: Aplicar para a imagem que vai ser inserida, ou seja: recortar a imagem que vai ser inserida (Buscar no CSV)
             # TODO: INSERIR IMAGEM -> RECORTAR CELULAS DA IMAGEM -> SEGMENTAR AS CELULAS -> MOSTRAR PARA O USUARIO (PLOTAR OU COLOCAR NA INTERFACE)
-            segmented_image = draw_rectangles('2cefdbf695da71852337ae3557ccdd38.png', '../src/data/classifications.csv', '../src/images', 'segmented-gui-cells', 100)
+            segmented_image, self.json_info_nucleus = draw_rectangles(self.file_selected, '../src/data/classifications.csv', '../src/images', n_value)
             self.update_canvas_with_segmented_image(segmented_image)
 
     def characterize(self):
@@ -126,6 +130,7 @@ class Application:
             self.cv_img = cv2.cvtColor(cv2.imread(file_path), cv2.COLOR_BGR2RGB)
 
             filename = file_path.split("/")[-1]
+            self.file_selected = filename
 
             # Atualizar os textos das seleções do arquivo
             self.text_label.config(text="IMAGEM SELECIONADA:")
