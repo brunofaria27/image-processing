@@ -5,11 +5,18 @@ from tkinter import filedialog, ttk
 from PIL import Image, ImageTk
 
 from app.draw_rectangles_app import draw_rectangles
+from app.image_processing_app import process_image
 
 class Application:
     def __init__(self, window, window_title):
         self.window = window
         self.window.title(window_title)
+
+        # VARIAVEIS IMPORTANTES
+        self.file_selected = None
+        self.json_info_nucleus = None
+        self.n_value = 100
+        self.cropped_images = None
 
         # Inicializar variáveis para controle de zoom
         self.zoom_factor = 1.0
@@ -33,11 +40,19 @@ class Application:
         self.menu.add_cascade(label="Arquivo", menu=self.file_menu)
         self.file_menu.add_command(label="Abrir", command=self.load_image)
 
+        # Criar um frame para conter o input do N e o dropdown
+        self.n_frame = tk.Frame(self.window)
+        self.n_frame.pack()
+        
         # Adicionar uma entrada para o valor de N
-        self.n_label = tk.Label(self.window, text="Valor de N:")
-        self.n_label.pack()
-        self.n_entry = tk.Entry(self.window)
-        self.n_entry.pack()
+        self.n_label = tk.Label(self.n_frame, text="Valor de N:")
+        self.n_label.grid(row=0, column=0)
+        self.n_entry = tk.Entry(self.n_frame)
+        self.n_entry.grid(row=0, column=1)
+
+        # Inicializar o dropdown como None no início
+        self.dropdown = None
+        self.selected_item = tk.StringVar()
 
         self.options_menu = tk.Menu(self.menu)
         self.menu.add_cascade(label="Opções", menu=self.options_menu)
@@ -67,10 +82,6 @@ class Application:
         self.scrollbar_h.config(command=self.canvas.xview)
         self.scrollbar_v.config(command=self.canvas.yview)
 
-        # VARIAVEIS IMPORTANTES
-        self.file_selected = None
-        self.json_info_nucleus = None
-
         # Inicializar a imagem como None
         self.cv_img = None
         self.photo = None
@@ -95,16 +106,20 @@ class Application:
         """
         try:
             self.error_n_label.config(text="")
-            n_value = int(self.n_entry.get())
+            self.n_value = int(self.n_entry.get())
         except (ValueError, UnboundLocalError):
             self.error_n_label.config(text="Você não inseriu N, valor a ser considerado = 100")
-            n_value = 100
+            self.n_value = 100
         finally:
             # TODO: Aplicar para a imagem que vai ser inserida, ou seja: recortar a imagem que vai ser inserida (Buscar no CSV)
             # TODO: INSERIR IMAGEM -> RECORTAR CELULAS DA IMAGEM -> SEGMENTAR AS CELULAS -> MOSTRAR PARA O USUARIO (PLOTAR OU COLOCAR NA INTERFACE)
-            segmented_image, self.json_info_nucleus = draw_rectangles(self.file_selected, '../src/data/classifications.csv', '../src/images', n_value)
+            segmented_image, self.json_info_nucleus = draw_rectangles(self.file_selected, '../src/data/classifications.csv', '../src/images', self.n_value)
             self.update_canvas_with_segmented_image(segmented_image)
+            self.initialize_dropdown()
 
+            # Processa a imagem inicial e depois todas que mudaram na interface
+            self.process_image()
+    
     def characterize(self):
         print('Caracterizar o núcleo através de descritores de forma.')
     
@@ -117,12 +132,35 @@ class Application:
         self.canvas.create_image(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
+    def initialize_dropdown(self):
+        optVariable = tk.StringVar(self.window)
+        optVariable.set(self.json_info_nucleus[0])
+        self.dropdown = tk.OptionMenu(self.n_frame, optVariable, *self.json_info_nucleus, command=self.dropdown_changed_and_cut)
+        self.dropdown.grid(row=0, column=2)
+        self.selected_item = optVariable
+
+    def dropdown_changed_and_cut(self, selection):
+        self.selected_item.set(selection)
+        self.process_image()
+
+    def process_image(self):
+        selected_item = self.selected_item.get()
+        if selected_item == self.json_info_nucleus[0]:
+            self.cropped_images = process_image(self.file_selected, self.n_value)
+            print(len(self.cropped_images))
+        else:
+            self.cropped_images = process_image(self.file_selected, self.n_value, cell_id=selected_item)
+            print(len(self.cropped_images))
+
     def load_image(self):
         '''
         Configuração da entrada da imagem.
             - Aplicar funcionalidade de zoom
             - Mostrar o nome do arquivo
         '''
+        if self.dropdown:
+            self.dropdown.destroy()
+
         # Abrir o seletor de arquivos
         file_path = filedialog.askopenfilename()
 
