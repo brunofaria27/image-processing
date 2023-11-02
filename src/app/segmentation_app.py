@@ -86,11 +86,9 @@ def process_segmentation(image_data):
     for image in image_data:
         center_colors = get_colors_around_center_pixel(image, radius=4)
         seed = (image.width // 2, image.height // 2)
-        threshold = 30  # Ajuste este valor de acordo com a similaridade desejada
+        threshold = 30
         visited = np.zeros((image.width, image.height), dtype=bool)
         region = region_growing(image, seed, center_colors, threshold, visited)
-
-        # Crie uma nova imagem com o fundo branco e depois adicione a região segmentada
         segmented_image = Image.new('RGB', image.size, (255, 255, 255))
         for pixel in region:
             segmented_image.putpixel(pixel, image.getpixel(pixel))
