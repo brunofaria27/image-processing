@@ -175,8 +175,8 @@ class Application:
             col = 0
             images_per_row = 10
 
-            canvas_width = 1200  # Largura desejada
-            canvas_height = 200  # Altura desejada
+            canvas_width = 1200  # Largura
+            canvas_height = 200  # Altura
 
             canvas = tk.Canvas(self.cells_images,
                                width=canvas_width, height=canvas_height)
@@ -197,7 +197,6 @@ class Application:
                 label.image = photo
                 label.grid(row=row, column=col, padx=5, pady=5)
 
-                # Adicione um rótulo para mostrar o número ou identificação do núcleo
                 if self.selected_item.get() == self.json_info_nucleus[0]:
                     nucleus_label = tk.Label(
                         frame, text=f'ID: {self.json_info_nucleus[idx + 1]}')
@@ -209,7 +208,7 @@ class Application:
                 col += 1
                 if col >= images_per_row:
                     col = 0
-                    row += 2  # Incrementado em 2 para deixar espaço para o rótulo do núcleo
+                    row += 2
 
             frame.update_idletasks()
             canvas.config(scrollregion=canvas.bbox("all"))
