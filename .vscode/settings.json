@@ -1,0 +1,14 @@
+{
+    "[python]": {
+      "editor.detectIndentation": false,
+      "editor.defaultFormatter": "ms-python.python",
+      "editor.insertSpaces": true,
+      "editor.tabSize": 2
+    },
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.indexing": true,
+    "python.analysis.typeCheckingMode": "strict",
+    "python.languageServer": "Pylance"
+  }
