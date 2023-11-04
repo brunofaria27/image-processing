@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 from app.draw_rectangles_app import draw_rectangles
 from app.image_processing_app import process_image
 from app.segmentation_app import main_process_segmentation
-
+from app.compare_centers import get_distance_centers
 
 class Application:
     def __init__(self, window, window_title):
@@ -15,11 +15,14 @@ class Application:
         self.window.title(window_title)
 
         # VARIAVEIS IMPORTANTES
+        self.csv_path = '../src/data/classifications.csv'
         self.file_selected = None
         self.json_info_nucleus = None
         self.n_value = 100
         self.cropped_images = None
         self.segmented_images = None
+        self.ids_segmented_images = None
+        self.original_image_shape = None
 
         # Inicializar variáveis para controle de zoom
         self.zoom_factor = 1.0
@@ -59,12 +62,7 @@ class Application:
 
         self.options_menu = tk.Menu(self.menu)
         self.menu.add_cascade(label="Opções", menu=self.options_menu)
-        self.options_menu.add_command(
-            label="Segmentar núcleos", command=self.segmentation)
-        self.options_menu.add_command(
-            label="Caracterizar núcleos", command=self.characterize)
-        self.options_menu.add_command(
-            label="Classificar núcleos", command=self.classification)
+        self.options_menu.add_command(label="Segmentar núcleos", command=self.segmentation)
 
         # Criar um frame para conter a imagem e o texto
         self.image_frame = tk.Frame(self.window)
@@ -84,8 +82,7 @@ class Application:
         self.scrollbar_v.grid(row=0, column=1, sticky="ns")
 
         # Adicionar um canvas para exibir a imagem
-        self.canvas = tk.Canvas(
-            self.image_frame, bd=0, xscrollcommand=self.scrollbar_h.set, yscrollcommand=self.scrollbar_v.set)
+        self.canvas = tk.Canvas(self.image_frame, bd=0, xscrollcommand=self.scrollbar_h.set, yscrollcommand=self.scrollbar_v.set)
         self.canvas.grid(row=0, column=0, sticky="nsew")
 
         # Configurar a barra de rolagem para controlar o canvas
@@ -112,15 +109,18 @@ class Application:
             self.error_n_label.config(text="")
             self.n_value = int(self.n_entry.get())
         except (ValueError, UnboundLocalError):
-            self.error_n_label.config(
-                text="Você não inseriu N, valor a ser considerado = 100")
+            self.error_n_label.config(text="Você não inseriu N, valor a ser considerado = 100")
             self.n_value = 100
         finally:
-            segmented_image, self.json_info_nucleus = draw_rectangles(
-                self.file_selected, '../src/data/classifications.csv', '../src/images', self.n_value)
+            segmented_image, self.json_info_nucleus = draw_rectangles(self.file_selected, self.csv_path, '../src/images', self.n_value)
+            self.original_image_shape = segmented_image.shape
             self.update_canvas_with_segmented_image(segmented_image)
             self.initialize_dropdown()
             self.process_image()  # Processa a imagem inicial e depois todas que mudaram na interface
+
+    def compare_center(self):
+        get_distance_centers(self.segmented_images, self.ids_segmented_images)
+        print('Comparar o centro do nucleo da celula segmentada com o que esta no CSV.')
 
     def characterize(self):
         print('Caracterizar o núcleo através de descritores de forma.')
@@ -128,18 +128,24 @@ class Application:
     def classification(self):
         print('Classificar cada núcleo encontrado na imagem.')
 
+    def create_new_buttons(self):
+        button1 = tk.Button(self.cells_images, text="Comparar centros", command=self.compare_center)
+        button2 = tk.Button(self.cells_images, text="Classificar nucleos", command=self.classification)
+        button3 = tk.Button(self.cells_images, text="Caracterizar nucleos", command=self.characterize)
+        button1.grid(row=0, column=2, padx=5, pady=5)
+        button2.grid(row=0, column=3, padx=5, pady=5)
+        button3.grid(row=0, column=4, padx=5, pady=5)
+
     def update_canvas_with_segmented_image(self, segmented_image):
         self.cv_img = segmented_image
         self.photo = ImageTk.PhotoImage(image=Image.fromarray(self.cv_img))
-        self.canvas.create_image(self.canvas.winfo_width(
-        ) // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
+        self.canvas.create_image(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
     def initialize_dropdown(self):
         optVariable = tk.StringVar(self.window)
         optVariable.set(self.json_info_nucleus[0])
-        self.dropdown = tk.OptionMenu(
-            self.n_frame, optVariable, *self.json_info_nucleus, command=self.dropdown_changed_and_cut)
+        self.dropdown = tk.OptionMenu(self.n_frame, optVariable, *self.json_info_nucleus, command=self.dropdown_changed_and_cut)
         self.dropdown.grid(row=0, column=2)
         self.selected_item = optVariable
 
@@ -169,7 +175,8 @@ class Application:
         # Limpe o frame do carrossel
         for widget in self.cells_images.winfo_children():
             widget.destroy()
-
+        # Limpa array de ids:
+        self.ids_segmented_images = []
         if self.cropped_images:
             row = 0
             col = 0
@@ -178,12 +185,10 @@ class Application:
             canvas_width = 1200  # Largura
             canvas_height = 200  # Altura
 
-            canvas = tk.Canvas(self.cells_images,
-                               width=canvas_width, height=canvas_height)
+            canvas = tk.Canvas(self.cells_images, width=canvas_width, height=canvas_height)
             canvas.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
 
-            vsb = tk.Scrollbar(self.cells_images,
-                               orient="vertical", command=canvas.yview)
+            vsb = tk.Scrollbar(self.cells_images, orient="vertical", command=canvas.yview)
             vsb.grid(row=0, column=1, padx=5, pady=5, sticky="ns")
             canvas.configure(yscrollcommand=vsb.set)
 
@@ -191,18 +196,18 @@ class Application:
             canvas.create_window((0, 0), window=frame, anchor="nw")
 
             for idx, image in enumerate(self.segmented_images):
-                photo = ImageTk.PhotoImage(image=Image.fromarray(
-                    cv2.cvtColor(image, cv2.COLOR_BGR2RGB)))
+                photo = ImageTk.PhotoImage(image=Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)))
                 label = tk.Label(frame, image=photo)
                 label.image = photo
                 label.grid(row=row, column=col, padx=5, pady=5)
 
                 if self.selected_item.get() == self.json_info_nucleus[0]:
-                    nucleus_label = tk.Label(
-                        frame, text=f'ID: {self.json_info_nucleus[idx + 1]}')
+                    nucleus_label = tk.Label(frame, text=f'ID: {self.json_info_nucleus[idx + 1]}')
+                    self.ids_segmented_images.append(self.json_info_nucleus[idx + 1])
                 else:
-                    nucleus_label = tk.Label(
-                        frame, text=f'ID: {self.selected_item.get()}')
+                    nucleus_label = tk.Label(frame, text=f'ID: {self.selected_item.get()}')
+                    self.ids_segmented_images.append(self.selected_item.get())
+                    
                 nucleus_label.grid(row=row + 1, column=col, padx=5, pady=5)
 
                 col += 1
@@ -212,6 +217,7 @@ class Application:
 
             frame.update_idletasks()
             canvas.config(scrollregion=canvas.bbox("all"))
+            self.create_new_buttons() # Criar botoes para usar nas celulas segmentadas.
 
     def load_image(self):
         '''
@@ -235,8 +241,7 @@ class Application:
             # Criar uma imagem TKinter a partir da imagem OpenCV
             self.photo = ImageTk.PhotoImage(image=Image.fromarray(self.cv_img))
 
-            self.canvas.create_image(self.canvas.winfo_width(
-            ) // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
+            self.canvas.create_image(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
 
             self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
@@ -275,6 +280,5 @@ class Application:
 
         # Criar uma nova imagem TKinter e atualizar o canvas
         self.photo = ImageTk.PhotoImage(image=Image.fromarray(resized_img))
-        self.canvas.create_image(self.canvas.winfo_width(
-        ) // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
+        self.canvas.create_image(self.canvas.winfo_width() // 2, self.canvas.winfo_height() // 2, anchor="center", image=self.photo)
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
