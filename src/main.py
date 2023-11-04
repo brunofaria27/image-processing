@@ -1,4 +1,4 @@
-from app.gui_app import Application
+from app.principal_interface_app import Application
 
 import tkinter as tk
 

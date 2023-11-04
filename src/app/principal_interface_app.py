@@ -8,6 +8,7 @@ from app.draw_rectangles_app import draw_rectangles
 from app.image_processing_app import process_image
 from app.segmentation_app import main_process_segmentation
 from app.compare_centers import get_distance_centers
+from app.center_comparison import CenterComparison
 
 class Application:
     def __init__(self, window, window_title):
@@ -119,8 +120,8 @@ class Application:
             self.process_image()  # Processa a imagem inicial e depois todas que mudaram na interface
 
     def compare_center(self):
-        get_distance_centers(self.segmented_images, self.ids_segmented_images)
-        print('Comparar o centro do nucleo da celula segmentada com o que esta no CSV.')
+        distances_to_orinal_center = get_distance_centers(self.segmented_images, self.ids_segmented_images)
+        window_center_comparison = CenterComparison(tk.Toplevel(), "Comparação de centros", distances_to_orinal_center, self.segmented_images)
 
     def characterize(self):
         print('Caracterizar o núcleo através de descritores de forma.')

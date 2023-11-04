@@ -12,18 +12,19 @@ def calculate_distance(image):
     csv_center_y_resize = csv_x_and_y[0] // 2
     
     distance = np.sqrt((new_center_x - csv_center_x_resize) ** 2 + (new_center_y - csv_center_y_resize) ** 2)
-    return distance
+    return distance, new_center_x, new_center_y
 
 def get_distance_centers(segmented_images, ids_segmented_images):
     distances = []
     
     for i, image in enumerate(segmented_images):
-        distance = calculate_distance(image)
+        distance, new_center_x, new_center_y = calculate_distance(image)
         
         if distance is not None:
             distances.append({
                 'image_id': ids_segmented_images[i],
-                'distance_to_nucleus': distance
+                'distance_to_nucleus': distance,
+                'coords': [new_center_x, new_center_y]
             })
 
     return distances
