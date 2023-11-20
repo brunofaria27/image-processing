@@ -7,8 +7,8 @@ from PIL import Image, ImageTk
 from app.draw_rectangles_app import draw_rectangles
 from app.image_processing_app import process_image
 from app.segmentation_app import main_process_segmentation
-from app.compare_centers import get_distance_centers
-from app.center_comparison import CenterComparison
+from app.compare_centers_app import get_distance_centers
+from app.center_comparison_app import CenterComparison
 
 class Application:
     def __init__(self, window, window_title):
