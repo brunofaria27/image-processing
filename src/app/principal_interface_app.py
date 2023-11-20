@@ -3,12 +3,13 @@ import tkinter as tk
 
 from tkinter import filedialog, ttk
 from PIL import Image, ImageTk
+from app.cell_nucleus_characterization_utils_app import extract_features, plot_scatterplot
 
 from app.draw_rectangles_app import draw_rectangles
 from app.image_processing_app import process_image
 from app.segmentation_app import main_process_segmentation
-from app.compare_centers_app import get_distance_centers
-from app.center_comparison_app import CenterComparison
+from app.compare_centers_utils_app import get_distance_centers
+from app.center_comparison_interface_app import CenterComparison
 
 class Application:
     def __init__(self, window, window_title):
@@ -24,6 +25,7 @@ class Application:
         self.segmented_images = None
         self.ids_segmented_images = None
         self.original_image_shape = None
+        self.countors = None
 
         # Inicializar variáveis para controle de zoom
         self.zoom_factor = 1.0
@@ -121,10 +123,11 @@ class Application:
 
     def compare_center(self):
         distances_to_orinal_center = get_distance_centers(self.segmented_images, self.ids_segmented_images)
-        window_center_comparison = CenterComparison(tk.Toplevel(), "Comparação de centros", distances_to_orinal_center, self.segmented_images)
+        CenterComparison(tk.Toplevel(), "Comparação de centros", distances_to_orinal_center, self.segmented_images)
 
     def characterize(self):
-        print('Caracterizar o núcleo através de descritores de forma.')
+        features_df = extract_features(self.segmented_images, self.countors, self.ids_segmented_images)
+        plot_scatterplot(features_df)
 
     def classification(self):
         print('Classificar cada núcleo encontrado na imagem.')
@@ -169,7 +172,7 @@ class Application:
             image_object = Image.fromarray(image)
             image_objects.append(image_object)
 
-        self.segmented_images = main_process_segmentation(image_objects)
+        self.segmented_images, self.countors = main_process_segmentation(image_objects)
         self.update_image_carousel()
 
     def update_image_carousel(self):

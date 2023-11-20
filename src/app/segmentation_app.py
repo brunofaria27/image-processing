@@ -42,12 +42,6 @@ def region_growing(image, seed, colors, threshold, visited):
             if any(hsv_color_similarity(pixel_color, target_color) <= threshold for target_color in target_colors):
                 region.append((x, y))
 
-                neighbors_8 = [
-                    (x - 1, y - 1), (x, y - 1), (x + 1, y - 1),
-                    (x - 1, y), (x + 1, y),
-                    (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)
-                ]
-
                 neighbors_4 = [
                     (x, y - 1),
                     (x - 1, y),
@@ -98,16 +92,18 @@ def process_segmentation(image_data):
 
 def process_contours(segmented_images, image_data):
     final_segmentation = []
+    contours_final_segmentation = []
 
     for i in range(0, len(segmented_images)):
         array_image = np.array(segmented_images[i])
         contours = contour_segmented_images(array_image)
         final_segmentation_image = apply_mask(image_data[i], contours)
         final_segmentation.append(final_segmentation_image)
-    return final_segmentation
+        contours_final_segmentation.append(contours)
+    return final_segmentation, contours_final_segmentation
 
 
 def main_process_segmentation(image_data):
     segmented_images = process_segmentation(image_data)
-    final_segmentation = process_contours(segmented_images, image_data)
-    return final_segmentation
+    final_segmentation, countors = process_contours(segmented_images, image_data)
+    return final_segmentation, countors
