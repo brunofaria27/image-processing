@@ -1,4 +1,6 @@
 import os
+import shutil
+import random
 import matplotlib.pyplot as plt
 
 from PIL import Image
@@ -59,3 +61,32 @@ def write_segmented_images(image_data, segmented_images, output_dir):
             segmented_image = Image.fromarray(segmented_image)
             segmented_image.save(output_path)
     print(f'Todas as imagens carregadas para {output_dir}')
+
+def separate_dataset(dataset_path, output_path, percentage_train=0.8):
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+
+    for _class in os.listdir(dataset_path):
+        class_path = os.path.join(dataset_path, _class)
+        if os.path.isdir(class_path):
+            files_class = os.listdir(class_path)
+
+            random.shuffle(files_class)
+
+            index_train = int(len(files_class) * percentage_train)
+
+            train_data = files_class[:index_train]
+            test_data = files_class[index_train:]
+
+            train_path = os.path.join(output_path, 'train', _class)
+            test_path = os.path.join(output_path, 'test', _class)
+
+            os.makedirs(train_path, exist_ok=True)
+            os.makedirs(test_path, exist_ok=True)
+
+            for _file in train_data:
+                shutil.copy2(os.path.join(class_path, _file), train_path)
+
+            for _file in test_data:
+                shutil.copy2(os.path.join(class_path, _file), test_path)
+    print(f'Imagens separadas em treino ({percentage_train}) e teste no diretório {output_path}')

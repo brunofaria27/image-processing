@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-from utils import write_segmented_images, create_folders_classes
+from utils import separate_dataset, write_segmented_images, create_folders_classes
 from PIL import Image
 
 def read_images(dir_name):
@@ -152,6 +152,11 @@ def main():
 
     print('Guardando imagens segmentadas...')
     write_segmented_images(image_data, final_segmentation, '../segmented-images/')
+
+    dataset_path = '../src/segmented-images'
+    output_path = '../src/separate_dataset'
+    print('Separando dataset em treino e teste...')
+    separate_dataset(dataset_path, output_path)
 
 if __name__ == "__main__":
     main()
