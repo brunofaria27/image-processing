@@ -153,8 +153,8 @@ def main():
     print('Guardando imagens segmentadas...')
     write_segmented_images(image_data, final_segmentation, '../segmented-images/')
 
-    dataset_path = '../src/segmented-images'
-    output_path = '../src/separate_dataset'
+    dataset_path = '../segmented-images'
+    output_path = '../separate-dataset'
     print('Separando dataset em treino e teste...')
     separate_dataset(dataset_path, output_path)
 
