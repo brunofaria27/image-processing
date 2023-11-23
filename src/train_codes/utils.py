@@ -1,11 +1,12 @@
 import os
 import shutil
 import random
+import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
 from PIL import Image
-
-# Funções para plotar as imagens 
+    
 def display_all_images(data, num_images_to_display=10):
     for folder, images in data.items():
         print(f"Folder: {folder}")
@@ -72,21 +73,29 @@ def separate_dataset(dataset_path, output_path, percentage_train=0.8):
             files_class = os.listdir(class_path)
 
             random.shuffle(files_class)
-
             index_train = int(len(files_class) * percentage_train)
-
             train_data = files_class[:index_train]
             test_data = files_class[index_train:]
 
             train_path = os.path.join(output_path, 'train', _class)
             test_path = os.path.join(output_path, 'test', _class)
-
             os.makedirs(train_path, exist_ok=True)
             os.makedirs(test_path, exist_ok=True)
 
             for _file in train_data:
-                shutil.copy2(os.path.join(class_path, _file), train_path)
+                src_path = os.path.join(class_path, _file)
+                dest_path = os.path.join(train_path, _file)
+                shutil.copy2(src_path, dest_path)
 
             for _file in test_data:
-                shutil.copy2(os.path.join(class_path, _file), test_path)
-    print(f'Imagens separadas em treino ({percentage_train}) e teste no diretório {output_path}')
+                src_path = os.path.join(class_path, _file)
+                dest_path = os.path.join(test_path, _file)
+                shutil.copy2(src_path, dest_path)
+
+                # Count and print the number of files in each folder
+            num_train_files = len(os.listdir(train_path))
+            num_test_files = len(os.listdir(test_path))
+            print(f'Class {_class}: {num_train_files} files in training set, {num_test_files} files in test set')
+                
+
+    print(f'Images separated into training ({percentage_train}) and testing sets in the directory {output_path}')
