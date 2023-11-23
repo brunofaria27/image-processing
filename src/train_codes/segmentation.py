@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-from utils import separate_dataset, write_segmented_images, create_folders_classes
 from PIL import Image
+
+from utils import separate_dataset, separate_negative_to_others_dataset, write_segmented_images, create_folders_classes
 
 def read_images(dir_name):
     base_dir = dir_name
@@ -155,8 +156,13 @@ def main():
 
     dataset_path = '../segmented-images'
     output_path = '../separate-dataset'
+    output_path_bin = '../separate-bin-dataset'
+
     print('Separando dataset em treino e teste...')
     separate_dataset(dataset_path, output_path)
+
+    print('Separando dataset em treino e teste binario...')
+    separate_negative_to_others_dataset(dataset_path, output_path_bin)
 
 if __name__ == "__main__":
     main()

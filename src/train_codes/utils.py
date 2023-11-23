@@ -99,3 +99,59 @@ def separate_dataset(dataset_path, output_path, percentage_train=0.8):
                 
 
     print(f'Images separated into training ({percentage_train}) and testing sets in the directory {output_path}')
+
+def count_files_in_folders(folder_path):
+    num_files = len(os.listdir(folder_path))
+    return num_files
+
+def separate_negative_to_others_dataset(dataset_path, output_path, percentage_train=0.8):
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+
+    negative_class = "Negative for intraepithelial lesion"
+    
+    for _class in os.listdir(dataset_path):
+        class_path = os.path.join(dataset_path, _class)
+        if os.path.isdir(class_path):
+            files_class = os.listdir(class_path)
+
+            # Separate files into training and testing sets
+            random.shuffle(files_class)
+            index_train = int(len(files_class) * percentage_train)
+            train_data = files_class[:index_train]
+            test_data = files_class[index_train:]
+
+            # Create directories for training and testing sets
+            if _class == negative_class:
+                train_path = os.path.join(output_path, 'train', negative_class)
+                test_path = os.path.join(output_path, 'test', negative_class)
+            else:
+                train_path = os.path.join(output_path, 'train', 'Others')
+                test_path = os.path.join(output_path, 'test', 'Others')
+
+            os.makedirs(train_path, exist_ok=True)
+            os.makedirs(test_path, exist_ok=True)
+
+            # Copy files to training and testing sets
+            for _file in train_data:
+                src_path = os.path.join(class_path, _file)
+                dest_path = os.path.join(train_path, _file)
+                shutil.copy2(src_path, dest_path)
+
+            for _file in test_data:
+                src_path = os.path.join(class_path, _file)
+                dest_path = os.path.join(test_path, _file)
+                shutil.copy2(src_path, dest_path)
+
+            # Count and print the number of files in each folder for Negative and Others classes
+            num_train_negative_files = count_files_in_folders(train_path)
+            num_test_negative_files = count_files_in_folders(test_path)
+            
+            if _class == negative_class:
+                print(f'Class {negative_class}: {num_train_negative_files} files in training set, {num_test_negative_files} files in test set')
+            else:
+                num_train_others_files = count_files_in_folders(train_path)
+                num_test_others_files = count_files_in_folders(test_path)
+                print(f'Class Others: {num_train_others_files} files in training set, {num_test_others_files} files in test set')
+
+    print(f'Images separated into training ({percentage_train}) and testing sets for Negative class and Others in the directory {output_path}')
