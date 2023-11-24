@@ -1,110 +1,82 @@
 import numpy as np
+import time
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, accuracy_score
-from keras.preprocessing.image import ImageDataGenerator
-from keras.applications import ResNet50
-from keras.layers import Dense, GlobalAveragePooling2D
-from keras.models import Model
-from keras.optimizers import Adam
+from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score, accuracy_score
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
+from sklearn.metrics import confusion_matrix
 
 train_data_dir = '../separate-bin-dataset/train'
 test_data_dir = '../separate-bin-dataset/test'
-img_width, img_height = 100, 100
-batch_size = 32
 
-train_datagen = ImageDataGenerator(rescale=1./255)
-test_datagen = ImageDataGenerator(rescale=1./255)
+base_model = ResNet50(weights='imagenet', include_top=False)
 
-train_generator = train_datagen.flow_from_directory(
+layer = base_model.output
+layer = GlobalAveragePooling2D()(layer)
+prediction = Dense(1, activation='sigmoid')(layer)
+
+model = Model(inputs=base_model.input, outputs=prediction)
+for nos in base_model.layers:
+    nos.trainable = False
+
+model.compile(optimizer=Adam(lr=0.001), loss='binary_crossentropy', metrics=['accuracy'])
+
+train_data = ImageDataGenerator(
+    rescale=1./255,
+    shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True
+)
+
+train_generator = train_data.flow_from_directory(
     train_data_dir,
-    target_size=(img_width, img_height),
-    batch_size=batch_size,
-    class_mode='binary')
+    target_size=(100, 100),
+    batch_size=32,
+    class_mode='binary'
+)
 
-test_generator = test_datagen.flow_from_directory(
+start_time = time.time()
+model.fit(train_generator, epochs=150)
+end_time = time.time()
+
+execution_time = end_time - start_time
+print('Tempo de execução: ', execution_time)
+
+model.save('my_model_binary.h5')
+
+test_data_gen = ImageDataGenerator(rescale=1./255)
+
+test_generator = test_data_gen.flow_from_directory(
     test_data_dir,
-    target_size=(img_width, img_height),
-    batch_size=batch_size,
-    class_mode='binary')
+    target_size=(100, 100),
+    batch_size=32,
+    class_mode='binary',
+    shuffle=False
+)
 
-# 1. Primeira Rede Binária
-model_binary = ResNet50(weights='imagenet', include_top=False, input_shape=(img_width, img_height, 3))
+test_labels = test_generator.classes
 
-for layer in model_binary.layers:
-    layer.trainable = False
+predictions = model.predict(test_generator)
+predicted_classes = np.where(predictions > 0.5, 1, 0)
 
-x = model_binary.output
-x = GlobalAveragePooling2D()(x)
-x = Dense(1024, activation='relu')(x)
-predictions_binary = Dense(1, activation='sigmoid')(x)
+# Calculate metrics
+accuracy = accuracy_score(test_labels, predicted_classes)
+precision = precision_score(test_labels, predicted_classes)
+recall = recall_score(test_labels, predicted_classes)
+f1 = f1_score(test_labels, predicted_classes)
 
-model_binary = Model(inputs=model_binary.input, outputs=predictions_binary)
-model_binary.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+cm = confusion_matrix(test_labels, predicted_classes)
+tn, fp, fn, tp = cm.ravel()
+sensitivity = tp / (tp + fn)
+specificity = tn / (tn + fp)
 
-# Treinamento
-history_binary = model_binary.fit(
-    train_generator,
-    steps_per_epoch=train_generator.samples // batch_size,
-    epochs=10,
-    validation_data=test_generator,
-    validation_steps=test_generator.samples // batch_size)
-
-# Avaliação
-y_pred_binary = model_binary.predict(test_generator)
-y_pred_binary = (y_pred_binary > 0.5).astype(int)
-acc_binary = accuracy_score(test_generator.classes, y_pred_binary)
-conf_matrix_binary = confusion_matrix(test_generator.classes, y_pred_binary)
-
-# Plote os gráficos de aprendizado
-plt.plot(history_binary.history['accuracy'], label='Training Accuracy')
-plt.plot(history_binary.history['val_accuracy'], label='Validation Accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend()
-plt.savefig('accuracy1.jpg')
-
-# 2. Segunda Rede usando ResNet50 com fine-tuning
-base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(img_width, img_height, 3))
-
-for layer in base_model.layers:
-    layer.trainable = True
-
-x = base_model.output
-x = GlobalAveragePooling2D()(x)
-x = Dense(1024, activation='relu')(x)
-predictions = Dense(1, activation='sigmoid')(x)
-
-model_finetuned = Model(inputs=base_model.input, outputs=predictions)
-model_finetuned.compile(optimizer=Adam(lr=0.0001), loss='binary_crossentropy', metrics=['accuracy'])
-
-# Treinamento
-history_finetuned = model_finetuned.fit(
-    train_generator,
-    steps_per_epoch=train_generator.samples // batch_size,
-    epochs=10,
-    validation_data=test_generator,
-    validation_steps=test_generator.samples // batch_size)
-
-# Avaliação
-y_pred_finetuned = model_finetuned.predict(test_generator)
-y_pred_finetuned = (y_pred_finetuned > 0.5).astype(int)
-acc_finetuned = accuracy_score(test_generator.classes, y_pred_finetuned)
-conf_matrix_finetuned = confusion_matrix(test_generator.classes, y_pred_finetuned)
-
-# Plote os gráficos de aprendizado
-plt.plot(history_finetuned.history['accuracy'], label='Training Accuracy')
-plt.plot(history_finetuned.history['val_accuracy'], label='Validation Accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend()
-plt.savefig('accuracy2.jpg')
-
-# Imprima acurácia e matrizes de confusão
-print("Binary Model Accuracy:", acc_binary)
-print("Binary Model Confusion Matrix:")
-print(conf_matrix_binary)
-
-
-print("\nFine-tuned Model Accuracy:", acc_finetuned)
-print("Fine-tuned Model Confusion Matrix:")
-print(conf_matrix_finetuned)
+print('Matriz de confusão: ', cm)
+print('Acurácia: ', accuracy)
+print('Precisão: ', precision)
+print('Recall: ', recall)
+print('F1 score: ', f1)
+print('Sensibilidade: ', sensitivity)
+print('Especificidade: ', specificity)
