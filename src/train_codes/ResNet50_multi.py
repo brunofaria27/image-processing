@@ -5,6 +5,8 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
+# TODO: Tentar arrumar
+
 # Function to create a ResNet50 model
 def create_resnet_model(img_size, num_classes):
     base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(img_size[0], img_size[1], 3))

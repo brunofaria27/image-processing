@@ -9,6 +9,8 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
 from sklearn.metrics import confusion_matrix
 
+# TODO: Tentar arrumar
+
 train_data_dir = '../separate-bin-dataset/train'
 test_data_dir = '../separate-bin-dataset/test'
 

@@ -136,6 +136,10 @@ class Application:
         _, _ = self.generate_csv()
         process_mahalanobis_binary() # TODO: Fazer função
         process_mahalanobis_multiclass() # TODO: Fazer função
+        # TODO: Treinar modelos ResNet50 e fazer a funcao para printar as classes predizidas e as classes normais.
+        # TODO: Buscar a pasta do modelo já treinado, passar as imagens segmentadas e mostrar o resultado.
+        # TODO: Mostrar na tela as matrizes de confusão de mahalanobis e resnet50 (binary e multiclass)
+        # TODO: Mostrar na tela o gráfico de treinamento acurracia e loss resnet50 (binary e multiclass)
 
     def generate_csv(self):
         features_df_multiclass = extract_features_multiclass(self.segmented_images, self.ids_segmented_images)

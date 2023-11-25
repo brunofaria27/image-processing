@@ -7,7 +7,6 @@ import numpy as np
 IMAGE_DIR = './images/'
 CSV_FILE = './data/classifications.csv'
 
-
 def process_image(image_filename, n_size, cell_id=None):
     cropped_images = []
     if image_filename is not None:
@@ -19,7 +18,6 @@ def process_image(image_filename, n_size, cell_id=None):
                 if image is not None:
                     cropped_images = cut_cells(image_filename, image, cell_id, n_size, csv_reader, id=cell_id)
     return cropped_images
-
 
 def cut_cells(image_filename, image, cell_id, n_size, csv_reader, id=None):
     cropped_images = []
@@ -37,7 +35,6 @@ def cut_cells(image_filename, image, cell_id, n_size, csv_reader, id=None):
                 sub_image = cut_cell_process(image, nucleus_x, nucleus_y, n_size)
                 cropped_images.append(sub_image)
     return cropped_images
-
 
 def cut_cell_process(image, x_center, y_center, n_size):
     x1 = x_center - n_size // 2

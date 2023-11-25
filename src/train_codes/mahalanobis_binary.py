@@ -5,6 +5,8 @@ from sklearn.covariance import LedoitWolf
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score, confusion_matrix
 
+# TODO: Tentar arrumar
+
 def load_and_preprocess_data(train_path, test_path):
     train_df = pd.read_csv(train_path)
     test_df = pd.read_csv(test_path)
