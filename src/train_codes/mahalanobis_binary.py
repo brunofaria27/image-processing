@@ -41,7 +41,7 @@ def main():
     train_distances = X_train.apply(lambda x: calculate_mahalanobis_distance(x, train_mean, inv_cov_matrix), axis=1)
     test_distances = X_test.apply(lambda x: calculate_mahalanobis_distance(x, test_mean, inv_cov_matrix), axis=1)
 
-    threshold = 0.5
+    threshold = 0.8
     y_train_pred = (train_distances > threshold).astype(int)
     y_test_pred = (test_distances > threshold).astype(int)
 
