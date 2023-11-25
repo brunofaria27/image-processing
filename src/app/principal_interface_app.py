@@ -3,13 +3,15 @@ import tkinter as tk
 
 from tkinter import filedialog, ttk
 from PIL import Image, ImageTk
-from app.cell_nucleus_characterization_utils_app import extract_features, plot_scatterplot
 
 from app.draw_rectangles_app import draw_rectangles
 from app.image_processing_app import process_image
 from app.segmentation_app import main_process_segmentation
 from app.compare_centers_utils_app import get_distance_centers
 from app.center_comparison_interface_app import CenterComparison
+from app.mahalanobis_binary_app import process_mahalanobis_binary
+from app.mahalanobis_multiclass_app import process_mahalanobis_multiclass
+from app.cell_nucleus_characterization_utils_app import extract_features_binary, extract_features_multiclass, plot_scatterplot
 
 class Application:
     def __init__(self, window, window_title):
@@ -126,11 +128,19 @@ class Application:
         CenterComparison(tk.Toplevel(), "Comparação de centros", distances_to_orinal_center, self.segmented_images)
 
     def characterize(self):
-        features_df = extract_features(self.segmented_images, self.ids_segmented_images)
-        plot_scatterplot(features_df)
+        features_df_multiclass, features_df_binary = self.generate_csv()
+        plot_scatterplot(features_df_multiclass)
+        plot_scatterplot(features_df_binary)
 
     def classification(self):
-        print('Classificar cada núcleo encontrado na imagem.')
+        _, _ = self.generate_csv()
+        process_mahalanobis_binary() # TODO: Fazer função
+        process_mahalanobis_multiclass() # TODO: Fazer função
+
+    def generate_csv(self):
+        features_df_multiclass = extract_features_multiclass(self.segmented_images, self.ids_segmented_images)
+        features_df_binary = extract_features_binary(self.segmented_images, self.ids_segmented_images)
+        return features_df_multiclass, features_df_binary
 
     def create_new_buttons(self):
         button1 = tk.Button(self.cells_images, text="Comparar centros", command=self.compare_center)
