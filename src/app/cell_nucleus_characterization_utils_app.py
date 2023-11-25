@@ -22,7 +22,7 @@ def calculate_eccentricity(contour):
     eccentricity = np.sqrt(1 - (minor_axis ** 2) / (major_axis ** 2))
     return eccentricity
 
-def extract_features(segmented_images, contours_final_segmentation, cells_ids):
+def extract_features(segmented_images, cells_ids):
     data = {'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
 
     for i in range(0, len(segmented_images)):

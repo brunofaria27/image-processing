@@ -126,7 +126,7 @@ class Application:
         CenterComparison(tk.Toplevel(), "Comparação de centros", distances_to_orinal_center, self.segmented_images)
 
     def characterize(self):
-        features_df = extract_features(self.segmented_images, self.countors, self.ids_segmented_images)
+        features_df = extract_features(self.segmented_images, self.ids_segmented_images)
         plot_scatterplot(features_df)
 
     def classification(self):
