@@ -45,7 +45,7 @@ end_time = time.time()
 execution_time = end_time - start_time
 print('Tempo de execução: ', execution_time)
 
-model.save('my_model_binary.h5')
+model.save('ai_models/my_model_binary_resnet.h5')
 
 test_data_gen = ImageDataGenerator(rescale=1./255)
 

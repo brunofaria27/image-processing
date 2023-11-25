@@ -6,6 +6,27 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
 from PIL import Image
+
+def read_images(dir_name):
+    base_dir = dir_name
+
+    image_data = {}
+
+    for folder in os.listdir(base_dir):
+        folder_path = os.path.join(base_dir, folder)
+        
+        if os.path.isdir(folder_path):
+            images = []
+            
+            for filename in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, filename)
+                
+                if file_path.lower().endswith(('.png', '.jpg')):
+                    image = Image.open(file_path)
+                    images.append(image)
+            
+            image_data[folder] = images
+    return image_data
     
 def display_all_images(data, num_images_to_display=10):
     for folder, images in data.items():
@@ -57,7 +78,7 @@ def write_segmented_images(image_data, segmented_images, output_dir):
 
         for image, segmented_image in zip(images, segmented_images[folder]):
             image_name = os.path.splitext(os.path.basename(image.filename))[0]
-            output_filename = f"{image_name}_segmented.jpg"
+            output_filename = f"{image_name}.png"
             output_path = os.path.join(segmented_folder, output_filename)
             segmented_image = Image.fromarray(segmented_image)
             segmented_image.save(output_path)
