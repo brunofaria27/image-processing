@@ -1,124 +1,133 @@
+import time
+import numpy as np
+import seaborn as sns
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from tensorflow.keras import layers, models
+
+from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score, accuracy_score
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler
+from sklearn.metrics import confusion_matrix
 
 # TODO: Tentar arrumar
 
-# Function to create a ResNet50 model
-def create_resnet_model(img_size, num_classes):
-    base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(img_size[0], img_size[1], 3))
-    for layer in base_model.layers:
-        layer.trainable = False
+class CustomCallback(tf.keras.callbacks.Callback):
+    def __init__(self, test_generator):
+        self.train_accuracy = []
+        self.test_generator = test_generator
+        self.test_accuracies = []
 
-    model = models.Sequential()
-    model.add(base_model)
-    model.add(layers.GlobalAveragePooling2D())
-    model.add(layers.Dense(256, activation='relu'))
-    model.add(layers.Dropout(0.5))
-    model.add(layers.Dense(num_classes, activation='softmax'))
+    def on_epoch_end(self, epoch, logs=None):
+        self.train_accuracy.append(logs.get('accuracy'))
 
-    return model
+        # Calculate test accuracy
+        test_predictions = self.model.predict(self.test_generator)
+        test_predicted_classes = np.argmax(test_predictions, axis=1)
+        test_accuracy = accuracy_score(self.test_generator.classes, test_predicted_classes)
+        self.test_accuracies.append(test_accuracy)
+        print(f'Test Accuracy after Epoch {epoch + 1}: {test_accuracy}')
 
-# Function to train the model
-def train_model(model, train_generator, validation_generator, epochs, model_checkpoint):
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-
-    history = model.fit(
-        train_generator,
-        steps_per_epoch=train_generator.samples // batch_size,
-        epochs=epochs,
-        validation_data=validation_generator,
-        validation_steps=validation_generator.samples // batch_size,
-        callbacks=[model_checkpoint]
-    )
-
-    return history
-
-# Set the path to your data directories
 train_data_dir = '../separate-dataset/train'
 test_data_dir = '../separate-dataset/test'
 
-# Image size that ResNet50 expects
-img_size = (100, 100)
+base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(100, 100, 3))
 
-# Batch size
-batch_size = 32
+# Freeze all layers except the last few
+for layer in base_model.layers:
+    layer.trainable = False
 
-# Number of classes
-num_classes = 6
+layer = base_model.output
+layer = GlobalAveragePooling2D()(layer)
+layer = Dense(256, activation='relu')(layer)
+prediction = Dense(6, activation='softmax')(layer)
 
-train_datagen = ImageDataGenerator(
+model = Model(inputs=base_model.input, outputs=prediction)
+
+model.compile(optimizer=Adam(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+train_data = ImageDataGenerator(
     rescale=1./255,
     shear_range=0.2,
     zoom_range=0.2,
     horizontal_flip=True
 )
 
-test_datagen = ImageDataGenerator(rescale=1./255)
-
-train_generator = train_datagen.flow_from_directory(
+train_generator = train_data.flow_from_directory(
     train_data_dir,
-    target_size=img_size,
-    batch_size=batch_size,
-    class_mode='categorical'
+    target_size=(100, 100),
+    batch_size=32,
+    class_mode='categorical',
+    shuffle=True
 )
 
-test_generator = test_datagen.flow_from_directory(
+test_data_gen = ImageDataGenerator(rescale=1./255)
+
+test_generator = test_data_gen.flow_from_directory(
     test_data_dir,
-    target_size=img_size,
-    batch_size=batch_size,
-    class_mode='categorical'
+    target_size=(100, 100),
+    batch_size=32,
+    class_mode='categorical',
+    shuffle=False
 )
 
-# Create ResNet50 model
-model = create_resnet_model(img_size, num_classes)
+custom_callback = CustomCallback(test_generator)  # Used for plot graphs
+start_time = time.time()
+model.fit(train_generator, epochs=10, callbacks=[custom_callback])
+end_time = time.time()
 
-# Create model checkpoint to save the best weights during training
-model_checkpoint = ModelCheckpoint('trained_model/ResNet50_best.h5', save_best_only=True, save_weights_only=True, monitor='val_loss', mode='min', verbose=1)
+execution_time = end_time - start_time
+print('Tempo de execução: ', execution_time)
 
-# Train the model
-history = train_model(model, train_generator, test_generator, epochs=10, model_checkpoint=model_checkpoint)
+model.save('ai_models/my_model_multiclass_resnet.h5')
 
-# Save the entire model
-model.save('trained_model/ResNet50.h5')
+test_data_gen = ImageDataGenerator(rescale=1./255)
 
-# Plot the training and validation accuracy over epochs
-plt.plot(history.history['accuracy'], label='Training Accuracy')
-plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+test_generator = test_data_gen.flow_from_directory(
+    test_data_dir,
+    target_size=(100, 100),
+    batch_size=32,
+    class_mode='categorical',
+    shuffle=False
+)
+
+test_labels = test_generator.classes
+
+predictions = model.predict(test_generator)
+predicted_classes = np.argmax(predictions, axis=1)
+
+# Calculate metrics
+accuracy = accuracy_score(test_labels, predicted_classes)
+precision = precision_score(test_labels, predicted_classes, average='weighted')
+recall = recall_score(test_labels, predicted_classes, average='weighted')
+f1 = f1_score(test_labels, predicted_classes, average='weighted')
+
+cm = confusion_matrix(test_labels, predicted_classes)
+
+# Plot and save learning curve
+plt.plot(custom_callback.train_accuracy, label='Train Accuracy')
+plt.plot(custom_callback.test_accuracies, label='Test Accuracy')
+plt.title('Training and Test Accuracy Over Epochs')
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
 plt.legend()
-plt.savefig('accuracy.jpg')
+plt.savefig('graphs/accuracy_curve_multiclass.png')
+plt.show()
 
-import numpy as np
-from sklearn.metrics import confusion_matrix, classification_report
-import matplotlib.pyplot as plt
-import seaborn as sns
+# Plot and save confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.savefig('graphs/confusion_matrix_multiclass.png')
+plt.show()
 
-def plot_confusion_matrix(model, test_generator):
-    # Get the true labels
-    true_labels = test_generator.classes
-
-    # Get class indices
-    class_indices = test_generator.class_indices
-
-    # Make predictions
-    predictions = model.predict(test_generator)
-    predicted_labels = np.argmax(predictions, axis=1)
-
-    # Plot the confusion matrix
-    cm = confusion_matrix(true_labels, predicted_labels)
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', xticklabels=class_indices.keys(), yticklabels=class_indices.keys())
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-    plt.title('Confusion Matrix')
-    plt.savefig('MATRIX.jpg')
-
-    # Print classification report
-    print("Classification Report:\n", classification_report(true_labels, predicted_labels, target_names=class_indices.keys()))
-
-plot_confusion_matrix(model, test_generator)
+print(f'Classes: {test_labels}')
+print('Matriz de confusão: ', cm)
+print('Acurácia: ', accuracy)
+print('Precisão: ', precision)
+print('Recall: ', recall)
+print('F1 score: ', f1)
