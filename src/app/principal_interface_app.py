@@ -1,3 +1,4 @@
+from tkinter import scrolledtext
 import cv2
 import tkinter as tk
 
@@ -9,8 +10,7 @@ from app.image_processing_app import process_image
 from app.segmentation_app import main_process_segmentation
 from app.compare_centers_utils_app import get_distance_centers
 from app.center_comparison_interface_app import CenterComparison
-from app.mahalanobis_binary_app import process_mahalanobis_binary
-from app.mahalanobis_multiclass_app import process_mahalanobis_multiclass
+from app.mahalanobis_app import process_mahalanobis_multiclass, process_mahalanobis_binary
 from app.cell_nucleus_characterization_utils_app import extract_features_binary, extract_features_multiclass, plot_scatterplot
 
 class Application:
@@ -134,8 +134,12 @@ class Application:
 
     def classification(self):
         _, _ = self.generate_csv()
-        process_mahalanobis_binary() # TODO: Fazer função
-        process_mahalanobis_multiclass() # TODO: Fazer função
+        classifications = []
+        table_binary = process_mahalanobis_binary()
+        classifications.append(table_binary)
+        table_multiclass = process_mahalanobis_multiclass()
+        classifications.append(table_multiclass)
+        # TODO: Interface para mostrar todas as classificações
         # TODO: Treinar modelos ResNet50 e fazer a funcao para printar as classes predizidas e as classes normais.
         # TODO: Buscar a pasta do modelo já treinado, passar as imagens segmentadas e mostrar o resultado.
         # TODO: Mostrar na tela as matrizes de confusão de mahalanobis e resnet50 (binary e multiclass)

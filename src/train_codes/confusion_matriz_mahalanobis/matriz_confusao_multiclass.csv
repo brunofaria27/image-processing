@@ -1,0 +1,9 @@
+ASC-H,ASC-US,HSIL,LSIL,Negative for intraepithelial lesion,SCC
+1,0,1,5,9,1
+9,7,22,11,30,0
+9,7,20,6,16,0
+5,5,37,9,43,0
+22,13,87,16,709,2
+2,1,4,2,8,0
+
+Acurácia: 66.67%
