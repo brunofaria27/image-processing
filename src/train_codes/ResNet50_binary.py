@@ -73,7 +73,7 @@ test_generator = test_data_gen.flow_from_directory(
 
 custom_callback = CustomCallback(test_generator)  # Used for plot graphs
 start_time = time.time()
-model.fit(train_generator, epochs=50, callbacks=[custom_callback])
+model.fit(train_generator, epochs=100, callbacks=[custom_callback])
 end_time = time.time()
 
 execution_time = end_time - start_time
@@ -82,6 +82,8 @@ print('Tempo de execução: ', execution_time)
 model.save('ai_models/my_model_binary_resnet.h5')
 
 test_labels = test_generator.classes
+class_names = list(test_generator.class_indices.keys())
+print(class_names)
 
 predictions = model.predict(test_generator)
 predicted_classes = np.where(predictions > 0.5, 1, 0)
