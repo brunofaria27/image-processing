@@ -94,6 +94,8 @@ test_generator = test_data_gen.flow_from_directory(
 )
 
 test_labels = test_generator.classes
+class_names = list(test_generator.class_indices.keys())
+print(class_names)
 
 predictions = model.predict(test_generator)
 predicted_classes = np.argmax(predictions, axis=1)

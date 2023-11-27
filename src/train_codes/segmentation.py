@@ -165,7 +165,7 @@ def main():
     augment_images(dataset_path, output_augumented_path)
 
     print('Separando dataset em treino e teste...')
-    separate_dataset(output_augumented_path, output_path, target_images_per_class=900, percentage_train=0.8)
+    separate_dataset(output_augumented_path, output_path, target_images_per_class=650, percentage_train=0.8)
 
     print('Separando dataset em treino e teste binario...')
     separate_negative_to_others_dataset(output_augumented_path, output_path_bin, target_images_per_class=3000, percentage_train=0.8)

@@ -7,11 +7,11 @@ from PIL import Image, ImageTk
 
 from app.draw_rectangles_app import draw_rectangles
 from app.image_processing_app import process_image
-from app.resnet_app import process_resnet_binary
 from app.segmentation_app import main_process_segmentation
 from app.compare_centers_utils_app import get_distance_centers
 from app.center_comparison_interface_app import CenterComparison
 from app.classification_interface_app import display_classification_window
+from app.resnet_app import process_resnet_binary, process_resnet_multiclass
 from app.mahalanobis_app import process_mahalanobis_multiclass, process_mahalanobis_binary
 from app.cell_nucleus_characterization_utils_app import extract_features_binary, extract_features_multiclass, plot_scatterplot
 
@@ -146,7 +146,9 @@ class Application:
             print(f'Não foi possivel fazer o Mahalanobis por falta de dados')
 
         table_binary_resnet = process_resnet_binary(self.segmented_images)
-        classifications.append(("Multiclass Classification ResNet50", table_binary_resnet, 0))
+        classifications.append(("Binary Classification ResNet50", table_binary_resnet, 0))
+        table_multiclass_resnet = process_resnet_multiclass(self.segmented_images)
+        classifications.append(("Multiclass Classification ResNet50", table_multiclass_resnet, 0))
 
         display_classification_window(classifications)
         # TODO: Treinar modelos ResNet50 e fazer a funcao.
