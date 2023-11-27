@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 
 from app.draw_rectangles_app import draw_rectangles
 from app.image_processing_app import process_image
+from app.resnet_app import process_resnet_binary
 from app.segmentation_app import main_process_segmentation
 from app.compare_centers_utils_app import get_distance_centers
 from app.center_comparison_interface_app import CenterComparison
@@ -136,10 +137,17 @@ class Application:
     def classification(self):
         _, _ = self.generate_csv()
         classifications = [] # Sempre adicionar o pd.DataFrame nessa lista após classificar.
-        table_binary, accuracy_binary = process_mahalanobis_binary()
-        classifications.append(("Binary Classification", table_binary, accuracy_binary))
-        table_multiclass, accuracy_multiclass = process_mahalanobis_multiclass()
-        classifications.append(("Multiclass Classification", table_multiclass, accuracy_multiclass))
+        try:
+            table_binary, accuracy_binary = process_mahalanobis_binary(self.ids_segmented_images)
+            classifications.append(("Binary Classification Mahalanobis", table_binary, accuracy_binary))
+            table_multiclass, accuracy_multiclass = process_mahalanobis_multiclass(self.ids_segmented_images)
+            classifications.append(("Multiclass Classification Mahalanobis", table_multiclass, accuracy_multiclass))
+        except:
+            print(f'Não foi possivel fazer o Mahalanobis por falta de dados')
+
+        table_binary_resnet = process_resnet_binary(self.segmented_images)
+        classifications.append(("Multiclass Classification ResNet50", table_binary_resnet, 0))
+
         display_classification_window(classifications)
         # TODO: Treinar modelos ResNet50 e fazer a funcao.
         # TODO: Buscar a pasta do modelo já treinado, passar as imagens segmentadas e mostrar o resultado.
