@@ -10,6 +10,7 @@ from app.image_processing_app import process_image
 from app.segmentation_app import main_process_segmentation
 from app.compare_centers_utils_app import get_distance_centers
 from app.center_comparison_interface_app import CenterComparison
+from app.classification_interface_app import display_classification_window
 from app.mahalanobis_app import process_mahalanobis_multiclass, process_mahalanobis_binary
 from app.cell_nucleus_characterization_utils_app import extract_features_binary, extract_features_multiclass, plot_scatterplot
 
@@ -134,16 +135,14 @@ class Application:
 
     def classification(self):
         _, _ = self.generate_csv()
-        classifications = []
-        table_binary = process_mahalanobis_binary()
-        classifications.append(table_binary)
-        table_multiclass = process_mahalanobis_multiclass()
-        classifications.append(table_multiclass)
-        # TODO: Interface para mostrar todas as classificações
-        # TODO: Treinar modelos ResNet50 e fazer a funcao para printar as classes predizidas e as classes normais.
+        classifications = [] # Sempre adicionar o pd.DataFrame nessa lista após classificar.
+        table_binary, accuracy_binary = process_mahalanobis_binary()
+        classifications.append(("Binary Classification", table_binary, accuracy_binary))
+        table_multiclass, accuracy_multiclass = process_mahalanobis_multiclass()
+        classifications.append(("Multiclass Classification", table_multiclass, accuracy_multiclass))
+        display_classification_window(classifications)
+        # TODO: Treinar modelos ResNet50 e fazer a funcao.
         # TODO: Buscar a pasta do modelo já treinado, passar as imagens segmentadas e mostrar o resultado.
-        # TODO: Mostrar na tela as matrizes de confusão de mahalanobis e resnet50 (binary e multiclass)
-        # TODO: Mostrar na tela o gráfico de treinamento acurracia e loss resnet50 (binary e multiclass)
 
     def generate_csv(self):
         features_df_multiclass = extract_features_multiclass(self.segmented_images, self.ids_segmented_images)
