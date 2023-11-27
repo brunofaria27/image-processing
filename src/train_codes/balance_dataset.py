@@ -1,6 +1,8 @@
 from PIL import Image
 import os
 
+import random
+
 def augment_images(input_path, output_path):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
@@ -16,6 +18,17 @@ def augment_images(input_path, output_path):
 
         files = os.listdir(class_path)
 
+        if class_name == 'HSIL':
+            num_transformations = 10
+        elif class_name == 'ASC-US':
+            num_transformations = 2
+        elif class_name == 'LSIL':
+            num_transformations = 1
+        elif class_name in ['ASC-H', 'SCC']:
+            num_transformations = 10
+        elif class_name == 'Negative for intraepithelial lesion':
+            num_transformations = 0
+
         for file in files:
             original_path = os.path.join(class_path, file)
             original_image = Image.open(original_path)
@@ -23,8 +36,9 @@ def augment_images(input_path, output_path):
             original_save_path = os.path.join(output_class_path, f'{file.split(".")[0]}_ID_original.png')
             original_image.save(original_save_path)
 
-            if class_name != 'Negative for intraepithelial lesion':
-                save_augmented_images(original_image, output_class_path, file)
+            if num_transformations > 0:
+                for _ in range(num_transformations):
+                    save_augmented_images(original_image, output_class_path, file)
 
 def save_augmented_images(original_image, output_path, file_name):
     for angle in [90, 180, 270]:
