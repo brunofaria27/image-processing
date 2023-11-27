@@ -151,8 +151,6 @@ class Application:
         classifications.append(("Multiclass Classification ResNet50", table_multiclass_resnet, 0))
 
         display_classification_window(classifications)
-        # TODO: Treinar modelos ResNet50 e fazer a funcao.
-        # TODO: Buscar a pasta do modelo já treinado, passar as imagens segmentadas e mostrar o resultado.
 
     def generate_csv(self):
         features_df_multiclass = extract_features_multiclass(self.segmented_images, self.ids_segmented_images)

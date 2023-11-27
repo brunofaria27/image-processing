@@ -12,8 +12,6 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.metrics import confusion_matrix
 
-# TODO: Tentar arrumar
-
 class CustomCallback(tf.keras.callbacks.Callback):
     def __init__(self, test_generator):
         self.train_accuracy = []
