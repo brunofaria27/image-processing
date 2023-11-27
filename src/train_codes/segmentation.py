@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-from utils import separate_dataset, write_segmented_images, create_folders_classes
 from PIL import Image
+
+from utils import separate_dataset, separate_negative_to_others_dataset, write_segmented_images, create_folders_classes
+from balance_dataset import augment_images
 
 def read_images(dir_name):
     base_dir = dir_name
@@ -155,8 +157,18 @@ def main():
 
     dataset_path = '../segmented-images'
     output_path = '../separate-dataset'
+    output_path_bin = '../separate-bin-dataset'
+    output_augumented_path = '../augmented-images'
+
+    print('Aumentando os datasets aplicando rotacoes e espelhamentos')
+    # Aumenta a quantidade de dados em classes != Negative
+    augment_images(dataset_path, output_augumented_path)
+
     print('Separando dataset em treino e teste...')
-    separate_dataset(dataset_path, output_path)
+    separate_dataset(output_augumented_path, output_path, target_images_per_class=650, percentage_train=0.8)
+
+    print('Separando dataset em treino e teste binario...')
+    separate_negative_to_others_dataset(output_augumented_path, output_path_bin, target_images_per_class=3000, percentage_train=0.8)
 
 if __name__ == "__main__":
     main()

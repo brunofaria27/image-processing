@@ -1,15 +1,19 @@
+from tkinter import scrolledtext
 import cv2
 import tkinter as tk
 
 from tkinter import filedialog, ttk
 from PIL import Image, ImageTk
-from app.cell_nucleus_characterization_utils_app import extract_features, plot_scatterplot
 
 from app.draw_rectangles_app import draw_rectangles
 from app.image_processing_app import process_image
 from app.segmentation_app import main_process_segmentation
 from app.compare_centers_utils_app import get_distance_centers
 from app.center_comparison_interface_app import CenterComparison
+from app.classification_interface_app import display_classification_window
+from app.resnet_app import process_resnet_binary, process_resnet_multiclass
+from app.mahalanobis_app import process_mahalanobis_multiclass, process_mahalanobis_binary
+from app.cell_nucleus_characterization_utils_app import extract_features_binary, extract_features_multiclass, plot_scatterplot
 
 class Application:
     def __init__(self, window, window_title):
@@ -126,11 +130,34 @@ class Application:
         CenterComparison(tk.Toplevel(), "Comparação de centros", distances_to_orinal_center, self.segmented_images)
 
     def characterize(self):
-        features_df = extract_features(self.segmented_images, self.countors, self.ids_segmented_images)
-        plot_scatterplot(features_df)
+        features_df_multiclass, features_df_binary = self.generate_csv()
+        plot_scatterplot(features_df_multiclass)
+        plot_scatterplot(features_df_binary)
 
     def classification(self):
-        print('Classificar cada núcleo encontrado na imagem.')
+        _, _ = self.generate_csv()
+        classifications = [] # Sempre adicionar o pd.DataFrame nessa lista após classificar.
+        try:
+            table_binary, accuracy_binary = process_mahalanobis_binary(self.ids_segmented_images)
+            classifications.append(("Binary Classification Mahalanobis", table_binary, accuracy_binary))
+            table_multiclass, accuracy_multiclass = process_mahalanobis_multiclass(self.ids_segmented_images)
+            classifications.append(("Multiclass Classification Mahalanobis", table_multiclass, accuracy_multiclass))
+        except:
+            print(f'Não foi possivel fazer o Mahalanobis por falta de dados')
+
+        table_binary_resnet = process_resnet_binary(self.segmented_images)
+        classifications.append(("Binary Classification ResNet50", table_binary_resnet, 0))
+        table_multiclass_resnet = process_resnet_multiclass(self.segmented_images)
+        classifications.append(("Multiclass Classification ResNet50", table_multiclass_resnet, 0))
+
+        display_classification_window(classifications)
+        # TODO: Treinar modelos ResNet50 e fazer a funcao.
+        # TODO: Buscar a pasta do modelo já treinado, passar as imagens segmentadas e mostrar o resultado.
+
+    def generate_csv(self):
+        features_df_multiclass = extract_features_multiclass(self.segmented_images, self.ids_segmented_images)
+        features_df_binary = extract_features_binary(self.segmented_images, self.ids_segmented_images)
+        return features_df_multiclass, features_df_binary
 
     def create_new_buttons(self):
         button1 = tk.Button(self.cells_images, text="Comparar centros", command=self.compare_center)

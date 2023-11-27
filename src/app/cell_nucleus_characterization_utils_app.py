@@ -2,11 +2,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
-import math
 import cv2
 import csv
-
-# TODO: Tentar ver se o cálculo do perimetro e da excentricidade estão corretos.
 
 def calculate_area(image, black_color=[0, 0, 0]):
     non_black_pixels = np.argwhere(np.all(np.array(image) != black_color, axis=-1))
@@ -17,38 +14,58 @@ def calculate_compactness(area, contour):
     compactness = (perimeter ** 2) / (4 * np.pi * area)
     return compactness
 
-def calculate_eccentricity(image, black_color=[0, 0, 0]):
-    non_black_pixels = np.argwhere(np.all(np.array(image) != black_color, axis=-1))
-    moments = cv2.moments(non_black_pixels)
-    Ixx = moments['mu20']
-    Iyy = moments['mu02']
-    Ixy = moments['mu11']
-    a = (Ixx + Iyy) / 2 + np.sqrt(4 * Ixy**2 + (Ixx - Iyy)**2) / 2
-    b = (Ixx + Iyy) / 2 - np.sqrt(4 * Ixy**2 + (Ixx - Iyy)**2) / 2
-    eccentricity = np.sqrt(1 - b/a)
+def calculate_eccentricity(contour):
+    ellipse = cv2.fitEllipse(contour)
+    major_axis = max(ellipse[1])
+    minor_axis = min(ellipse[1])
+    eccentricity = np.sqrt(1 - (minor_axis ** 2) / (major_axis ** 2))
     return eccentricity
 
-def extract_features(segmented_images, contours_final_segmentation, cells_ids):
+def extract_features_binary(segmented_images, cells_ids):
+    data = {'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
+
+    for i in range(0, len(segmented_images)):
+        classfication_csv = search_bethesda_system_cell_id(cells_ids[i])
+
+        # Categorize as 'Others' if the class is different from 'Negative for intraepithelial lesion'
+        if classfication_csv != 'Negative for intraepithelial lesion':
+            classfication_csv = 'Others'
+
+        area = calculate_area(segmented_images[i])
+        gray_image = cv2.cvtColor(np.array(segmented_images[i]), cv2.COLOR_RGB2GRAY)
+        contours, _ = cv2.findContours(gray_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contour = max(contours, key=cv2.contourArea)
+        compactness = calculate_compactness(area, contour)
+        eccentricity = calculate_eccentricity(contour)
+
+        data['Class'].append(classfication_csv)
+        data['Area'].append(area)
+        data['Compactness'].append(compactness)
+        data['Eccentricity'].append(eccentricity)
+
+    features_df = pd.DataFrame(data)
+    features_df.to_csv('csv_characterization/features_binary.csv', index=False)
+    return features_df
+
+def extract_features_multiclass(segmented_images, cells_ids):
     data = {'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
 
     for i in range(0, len(segmented_images)):
         classfification_csv = search_bethesda_system_cell_id(cells_ids[i])
-        contour = contours_final_segmentation[i]
         area = calculate_area(segmented_images[i])
+        gray_image = cv2.cvtColor(np.array(segmented_images[i]), cv2.COLOR_RGB2GRAY)
+        contours, _ = cv2.findContours(gray_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contour = max(contours, key=cv2.contourArea)
         compactness = calculate_compactness(area, contour)
-        eccentricity = calculate_eccentricity(segmented_images[i])
-
-        if math.isnan(eccentricity):
-            eccentricity = 0
+        eccentricity = calculate_eccentricity(contour)
 
         data['Class'].append(classfification_csv)
         data['Area'].append(area)
         data['Compactness'].append(compactness)
         data['Eccentricity'].append(eccentricity)
     features_df = pd.DataFrame(data)
-    features_df.to_csv('csv_characterization/features.csv', index=False)
+    features_df.to_csv('csv_characterization/features_multiclass.csv', index=False)
     return features_df
-
 
 def plot_scatterplot(features_df):
     unique_classes = features_df['Class'].unique()

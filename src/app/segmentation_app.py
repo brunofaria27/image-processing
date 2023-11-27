@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 from PIL import Image
 
-
 def get_colors_around_center_pixel(image, radius=5):
     height, width = image.size
     center_x, center_y = width // 2, height // 2
@@ -19,13 +18,11 @@ def get_colors_around_center_pixel(image, radius=5):
 
     return colors
 
-
 def hsv_color_similarity(color1, color2):
     hue_diff = abs(color1[0] - color2[0])
     sat_diff = abs(color1[1] - color2[1])
     val_diff = abs(color1[2] - color2[2])
     return hue_diff + sat_diff + val_diff
-
 
 def region_growing(image, seed, colors, threshold, visited):
     width, height = image.size
@@ -53,7 +50,6 @@ def region_growing(image, seed, colors, threshold, visited):
                              n[0] < width and 0 <= n[1] < height))
     return region
 
-
 def contour_segmented_images(segmented_image):
     gray = cv2.cvtColor(segmented_image, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -65,14 +61,12 @@ def contour_segmented_images(segmented_image):
     largest_contour = max(contours_per_image, key=cv2.contourArea)
     return largest_contour
 
-
 def apply_mask(image_data, contours):
     mask = np.zeros_like(image_data, dtype=np.uint8)
     cv2.drawContours(mask, [contours], 0,
                      (255, 255, 255), thickness=cv2.FILLED)
     segmented_image_with_contour = cv2.bitwise_and(np.array(image_data), mask)
     return segmented_image_with_contour
-
 
 def process_segmentation(image_data):
     segmented_images = []
@@ -89,7 +83,6 @@ def process_segmentation(image_data):
         segmented_images.append(segmented_image)
     return segmented_images
 
-
 def process_contours(segmented_images, image_data):
     final_segmentation = []
     contours_final_segmentation = []
@@ -101,7 +94,6 @@ def process_contours(segmented_images, image_data):
         final_segmentation.append(final_segmentation_image)
         contours_final_segmentation.append(contours)
     return final_segmentation, contours_final_segmentation
-
 
 def main_process_segmentation(image_data):
     segmented_images = process_segmentation(image_data)
