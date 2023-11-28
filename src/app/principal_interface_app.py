@@ -148,9 +148,9 @@ class Application:
         except:
             print(f'Não foi possivel fazer o Mahalanobis por falta de dados')
 
-        table_binary_resnet = process_resnet_binary(self.segmented_images)
+        table_binary_resnet = process_resnet_binary(self.cropped_images)
         classifications.append(("Binary Classification ResNet50", table_binary_resnet, 0))
-        table_multiclass_resnet = process_resnet_multiclass(self.segmented_images)
+        table_multiclass_resnet = process_resnet_multiclass(self.cropped_images)
         classifications.append(("Multiclass Classification ResNet50", table_multiclass_resnet, 0))
 
         process_mahalanobis_all_images() # Processar mahalanobis para todas as imagens
