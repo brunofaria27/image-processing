@@ -177,7 +177,7 @@ def main():
     separate_dataset(segmented_path, output_path_segmented, target_images_per_class=650, percentage_train=0.8)
 
     print('Separando dataset em treino e teste binario (com segmentação)...')
-    separate_negative_to_others_dataset(segmented_path, output_path_bin_segmented, target_images_per_class=3000, percentage_train=0.8)
+    separate_negative_to_others_dataset(segmented_path, output_path_bin_segmented, target_images_per_class=4000, percentage_train=0.8)
 
 if __name__ == "__main__":
     main()

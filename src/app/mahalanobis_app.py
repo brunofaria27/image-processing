@@ -78,7 +78,7 @@ def predict(train_data, test_data, multiclass=False):
         df.to_csv('confusion_matriz_mahalanobis/matriz_confusao_binary.csv', index=False)
 
 def process_mahalanobis_multiclass(ids_images):
-    file_path = '../csv_characterization/features_multiclass.csv'
+    file_path = 'csv_characterization/features_multiclass.csv'
     df_multiclass = pd.read_csv(file_path)
     table, accuracy = predict_mahalanobis(df_multiclass, ids_images)
     print(f'Accuracy: {accuracy}')

@@ -139,7 +139,7 @@ class Application:
     def classification(self):
         _, _, _, _ = self.generate_csv()
         classifications = [] # Sempre adicionar o pd.DataFrame nessa lista após classificar.
-        process_mahalanobis_all_images() # Processar mahalanobis para todas as imagens 
+        
         try:
             table_binary, accuracy_binary = process_mahalanobis_binary(self.ids_segmented_images)
             classifications.append(("Binary Classification Mahalanobis", table_binary, accuracy_binary))
@@ -153,6 +153,7 @@ class Application:
         table_multiclass_resnet = process_resnet_multiclass(self.segmented_images)
         classifications.append(("Multiclass Classification ResNet50", table_multiclass_resnet, 0))
 
+        process_mahalanobis_all_images() # Processar mahalanobis para todas as imagens
         display_classification_window(classifications)
 
     def generate_csv(self):

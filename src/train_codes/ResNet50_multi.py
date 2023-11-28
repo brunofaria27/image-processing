@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score, accuracy_score
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.metrics import confusion_matrix
@@ -61,7 +61,12 @@ train_generator = train_data.flow_from_directory(
     shuffle=True
 )
 
-test_data_gen = ImageDataGenerator(rescale=1./255)
+test_data_gen = ImageDataGenerator(
+    rescale=1./255,
+    shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True
+)
 
 test_generator = test_data_gen.flow_from_directory(
     test_data_dir,
@@ -80,16 +85,6 @@ execution_time = end_time - start_time
 print('Tempo de execução: ', execution_time)
 
 model.save('ai_models/my_model_multiclass_resnet.h5')
-
-test_data_gen = ImageDataGenerator(rescale=1./255)
-
-test_generator = test_data_gen.flow_from_directory(
-    test_data_dir,
-    target_size=(100, 100),
-    batch_size=32,
-    class_mode='categorical',
-    shuffle=False
-)
 
 test_labels = test_generator.classes
 class_names = list(test_generator.class_indices.keys())
