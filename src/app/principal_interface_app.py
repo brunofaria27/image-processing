@@ -12,8 +12,8 @@ from app.compare_centers_utils_app import get_distance_centers
 from app.center_comparison_interface_app import CenterComparison
 from app.classification_interface_app import display_classification_window
 from app.resnet_app import process_resnet_binary, process_resnet_multiclass
-from app.mahalanobis_app import process_mahalanobis_multiclass, process_mahalanobis_binary
-from app.cell_nucleus_characterization_utils_app import extract_features_binary, extract_features_multiclass, plot_scatterplot
+from app.mahalanobis_app import process_mahalanobis_all_images, process_mahalanobis_multiclass, process_mahalanobis_binary
+from app.cell_nucleus_characterization_utils_app import extract_all_images, extract_features_binary, extract_features_multiclass, plot_scatterplot
 
 class Application:
     def __init__(self, window, window_title):
@@ -130,13 +130,16 @@ class Application:
         CenterComparison(tk.Toplevel(), "Comparação de centros", distances_to_orinal_center, self.segmented_images)
 
     def characterize(self):
-        features_df_multiclass, features_df_binary = self.generate_csv()
+        features_df_multiclass, features_df_binary, features_df_binary_all, features_df_multiclass_all = self.generate_csv()
         plot_scatterplot(features_df_multiclass)
         plot_scatterplot(features_df_binary)
+        plot_scatterplot(features_df_binary_all)
+        plot_scatterplot(features_df_multiclass_all)
 
     def classification(self):
-        _, _ = self.generate_csv()
+        _, _, _, _ = self.generate_csv()
         classifications = [] # Sempre adicionar o pd.DataFrame nessa lista após classificar.
+        process_mahalanobis_all_images() # Processar mahalanobis para todas as imagens 
         try:
             table_binary, accuracy_binary = process_mahalanobis_binary(self.ids_segmented_images)
             classifications.append(("Binary Classification Mahalanobis", table_binary, accuracy_binary))
@@ -155,7 +158,8 @@ class Application:
     def generate_csv(self):
         features_df_multiclass = extract_features_multiclass(self.segmented_images, self.ids_segmented_images)
         features_df_binary = extract_features_binary(self.segmented_images, self.ids_segmented_images)
-        return features_df_multiclass, features_df_binary
+        features_df_binary_all, features_df_multiclass_all = extract_all_images()
+        return features_df_multiclass, features_df_binary, features_df_binary_all, features_df_multiclass_all
 
     def create_new_buttons(self):
         button1 = tk.Button(self.cells_images, text="Comparar centros", command=self.compare_center)

@@ -155,20 +155,29 @@ def main():
     print('Guardando imagens segmentadas...')
     write_segmented_images(image_data, final_segmentation, '../segmented-images/')
 
-    dataset_path = '../segmented-images'
+    segmented_path = '../segmented-images/'
+    dataset_path = '../images-processed/'
     output_path = '../separate-dataset'
     output_path_bin = '../separate-bin-dataset'
+    output_path_segmented = '../separate-dataset-segmented'
+    output_path_bin_segmented = '../separate-bin-dataset-segmented'
     output_augumented_path = '../augmented-images'
 
     print('Aumentando os datasets aplicando rotacoes e espelhamentos')
     # Aumenta a quantidade de dados em classes != Negative
     augment_images(dataset_path, output_augumented_path)
 
-    print('Separando dataset em treino e teste...')
+    print('Separando dataset em treino e teste (sem segmentação)...')
     separate_dataset(output_augumented_path, output_path, target_images_per_class=650, percentage_train=0.8)
 
-    print('Separando dataset em treino e teste binario...')
+    print('Separando dataset em treino e teste binario (sem segmentação)...')
     separate_negative_to_others_dataset(output_augumented_path, output_path_bin, target_images_per_class=3000, percentage_train=0.8)
+
+    print('Separando dataset em treino e teste (com segmentação)...')
+    separate_dataset(segmented_path, output_path_segmented, target_images_per_class=650, percentage_train=0.8)
+
+    print('Separando dataset em treino e teste binario (com segmentação)...')
+    separate_negative_to_others_dataset(segmented_path, output_path_bin_segmented, target_images_per_class=3000, percentage_train=0.8)
 
 if __name__ == "__main__":
     main()
