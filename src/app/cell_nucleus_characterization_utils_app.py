@@ -14,7 +14,7 @@ def calculate_area(image, black_color=[0, 0, 0]):
 
 def calculate_compactness(area, contour):
     perimeter = cv2.arcLength(contour, True)
-    compactness = (perimeter ** 2) / (4 * np.pi * area)
+    compactness = (4 * np.pi * area) / (perimeter ** 2)
     return compactness
 
 def calculate_eccentricity(contour):
