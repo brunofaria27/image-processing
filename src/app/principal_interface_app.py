@@ -12,7 +12,7 @@ from app.compare_centers_utils_app import get_distance_centers
 from app.center_comparison_interface_app import CenterComparison
 from app.classification_interface_app import display_classification_window
 from app.resnet_app import process_resnet_binary, process_resnet_multiclass
-from app.mahalanobis_app import process_mahalanobis_all_images, process_mahalanobis_multiclass, process_mahalanobis_binary
+from app.mahalanobis_app import process_mahalanobis_all_images, process_mahalanobis_binary_exception, process_mahalanobis_multiclass, process_mahalanobis_binary, process_mahalanobis_multiclass_exception
 from app.cell_nucleus_characterization_utils_app import extract_all_images, extract_features_binary, extract_features_multiclass, plot_scatterplot
 
 class Application:
@@ -130,23 +130,31 @@ class Application:
         CenterComparison(tk.Toplevel(), "Comparação de centros", distances_to_orinal_center, self.segmented_images)
 
     def characterize(self):
-        features_df_multiclass, features_df_binary, features_df_binary_all, features_df_multiclass_all = self.generate_csv()
+        features_df_multiclass, features_df_binary, _, _, features_all_df_multiclass, features_all_df_binary = self.generate_csv()
         plot_scatterplot(features_df_multiclass)
         plot_scatterplot(features_df_binary)
-        plot_scatterplot(features_df_binary_all)
-        plot_scatterplot(features_df_multiclass_all)
+        plot_scatterplot(features_all_df_multiclass)
+        plot_scatterplot(features_all_df_binary)
 
     def classification(self):
-        _, _, _, _ = self.generate_csv()
+        _, _, _, _, _, _ = self.generate_csv()
         classifications = [] # Sempre adicionar o pd.DataFrame nessa lista após classificar.
         
+        # Tratar a questão para saber se tem dados suficientes na imagem subida, senão testa com todos os dados
         try:
             table_binary, accuracy_binary = process_mahalanobis_binary(self.ids_segmented_images)
             classifications.append(("Binary Classification Mahalanobis", table_binary, accuracy_binary))
             table_multiclass, accuracy_multiclass = process_mahalanobis_multiclass(self.ids_segmented_images)
             classifications.append(("Multiclass Classification Mahalanobis", table_multiclass, accuracy_multiclass))
+            table_binary_all, accuracy_binary_all = process_mahalanobis_binary_exception(self.ids_segmented_images)
+            classifications.append(("Binary Classification Mahalanobis - Todos os dados", table_binary_all, accuracy_binary_all))
+            table_multiclass_all, accuracy_multiclass_all = process_mahalanobis_multiclass_exception(self.ids_segmented_images)
+            classifications.append(("Multiclass Classification Mahalanobis - Todos os dados", table_multiclass_all, accuracy_multiclass_all))
         except:
-            print(f'Não foi possivel fazer o Mahalanobis por falta de dados')
+            table_binary, accuracy_binary = process_mahalanobis_binary_exception(self.ids_segmented_images)
+            classifications.append(("Binary Classification Mahalanobis - Todos os dados", table_binary, accuracy_binary))
+            table_multiclass, accuracy_multiclass = process_mahalanobis_multiclass_exception(self.ids_segmented_images)
+            classifications.append(("Multiclass Classification Mahalanobis - Todos os dados", table_multiclass, accuracy_multiclass))
 
         table_binary_resnet = process_resnet_binary(self.cropped_images, self.ids_segmented_images)
         classifications.append(("Binary Classification ResNet50", table_binary_resnet, 0))
@@ -159,8 +167,8 @@ class Application:
     def generate_csv(self):
         features_df_multiclass = extract_features_multiclass(self.segmented_images, self.ids_segmented_images)
         features_df_binary = extract_features_binary(self.segmented_images, self.ids_segmented_images)
-        features_df_binary_all, features_df_multiclass_all = extract_all_images()
-        return features_df_multiclass, features_df_binary, features_df_binary_all, features_df_multiclass_all
+        features_df_binary_all, features_df_multiclass_all, features_all_df_multiclass, features_all_df_binary = extract_all_images()
+        return features_df_multiclass, features_df_binary, features_df_binary_all, features_df_multiclass_all, features_all_df_multiclass, features_all_df_binary
 
     def create_new_buttons(self):
         button1 = tk.Button(self.cells_images, text="Comparar centros", command=self.compare_center)

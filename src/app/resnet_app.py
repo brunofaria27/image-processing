@@ -8,7 +8,7 @@ from tensorflow.keras.applications.inception_v3 import preprocess_input
 
 def load_and_preprocess_image(image):
     img = cv2.resize(image, (100, 100))
-    img = img / 255.0  # Normalize the image
+    img = img / 255.0  # Normalizar a imagem
     img_array = np.expand_dims(img, axis=0)
     return img_array
 
@@ -25,7 +25,6 @@ def classify_image_multiclass(model, image):
     class_index = np.argmax(predictions)
     confidence = predictions[class_index] * 100
     
-    # Map class indices to class names
     class_names = ['ASC-H', 'ASC-US', 'HSIL', 'LSIL', 'Negative', 'SCC']
     class_name = class_names[class_index]
 

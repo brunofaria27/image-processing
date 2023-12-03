@@ -6,6 +6,7 @@ src/separate-bin-dataset-segmented/
 src/separate-dataset/
 src/separate-dataset-segmented/
 src/augmented-images/
+src/separate-bin-segmented/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

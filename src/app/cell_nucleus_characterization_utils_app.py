@@ -18,11 +18,14 @@ def calculate_compactness(area, contour):
     return compactness
 
 def calculate_eccentricity(contour):
-    ellipse = cv2.fitEllipse(contour)
-    major_axis = max(ellipse[1])
-    minor_axis = min(ellipse[1])
-    eccentricity = np.sqrt(1 - (minor_axis ** 2) / (major_axis ** 2))
-    return eccentricity
+    try:
+        ellipse = cv2.fitEllipse(contour)
+        major_axis = max(ellipse[1])
+        minor_axis = min(ellipse[1])
+        eccentricity = np.sqrt(1 - (minor_axis ** 2) / (major_axis ** 2))
+        return eccentricity
+    except Exception:
+        return 0
 
 def extract_features_binary(segmented_images, cells_ids):
     data = {'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
@@ -30,7 +33,6 @@ def extract_features_binary(segmented_images, cells_ids):
     for i in range(0, len(segmented_images)):
         classfication_csv = search_bethesda_system_cell_id(cells_ids[i])
 
-        # Categorize as 'Others' if the class is different from 'Negative for intraepithelial lesion'
         if classfication_csv != 'Negative for intraepithelial lesion':
             classfication_csv = 'Others'
 
@@ -106,6 +108,21 @@ def load_data(path_name):
             data[_class] = images
     return data
 
+def load_data_all(path_name, data_dict):
+    data = {}
+    for _class in os.listdir(path_name):
+        folder_path = os.path.join(path_name, _class)
+        if os.path.isdir(folder_path):
+            images = []
+            for filename in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, filename)
+                if file_path.lower().endswith(('.png', '.jpg')):
+                    with Image.open(file_path) as image:
+                        images.append(np.array(image))
+                        data_dict['ID'].append(os.path.splitext(filename)[0]) # Esse novo load foi necessário para ter os ID's das imagens
+            data[_class] = images
+    return data
+
 def process_dataset(data, data_dict):
     for class_name, images in data.items():
         for image in images:
@@ -128,26 +145,35 @@ def extract_all_images():
     train_data_path_multiclass = 'separate-dataset-segmented/train'
     test_data_path_multiclass = 'separate-dataset-segmented/test'
 
+    data_path_all_multiclass = 'segmented-images'
+    data_path_all_binary = 'separate-bin-segmented'
+
     train_data_binary = load_data(train_data_path_binary)
     test_data_binary = load_data(test_data_path_binary)
 
     train_data_multiclass = load_data(train_data_path_multiclass)
     test_data_multiclass = load_data(test_data_path_multiclass)
 
-    # Create a DataFrame to store the results
+    all_data_dict_multiclass = {'ID': [], 'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
+    all_data_dict_binary = {'ID': [], 'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
+
+    data_all_multiclass = load_data_all(data_path_all_multiclass, all_data_dict_multiclass)
+    data_all_binary = load_data_all(data_path_all_binary, all_data_dict_binary)
+
     test_data_dict_binary = {'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
     train_data_dict_binary = {'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
 
     test_data_dict_multiclass = {'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
     train_data_dict_multiclass = {'Class': [], 'Area': [], 'Compactness': [], 'Eccentricity': []}
 
-    # Populate the training dataset binary
     process_dataset(train_data_binary, train_data_dict_binary)
     process_dataset(test_data_binary, test_data_dict_binary)
 
-    # Populate the training dataset multiclass
     process_dataset(train_data_multiclass, train_data_dict_multiclass)
     process_dataset(test_data_multiclass, test_data_dict_multiclass)
+
+    process_dataset(data_all_multiclass, all_data_dict_multiclass)
+    process_dataset(data_all_binary, all_data_dict_binary)
 
     train_df_binary = pd.DataFrame(train_data_dict_binary)
     test_df_binary = pd.DataFrame(test_data_dict_binary)
@@ -155,9 +181,15 @@ def extract_all_images():
     train_df_multiclass = pd.DataFrame(train_data_dict_multiclass)
     test_df_multiclass = pd.DataFrame(test_data_dict_multiclass)
 
+    all_df_multiclass = pd.DataFrame(all_data_dict_multiclass)
+    all_df_binary = pd.DataFrame(all_data_dict_binary)
+
     train_df_binary.to_csv('csv_characterization/train_features_binary.csv', index=False)
     test_df_binary.to_csv('csv_characterization/test_features_binary.csv', index=False)
 
     train_df_multiclass.to_csv('csv_characterization/train_features_multiclass.csv', index=False)
     test_df_multiclass.to_csv('csv_characterization/test_features_multiclass.csv', index=False)
-    return train_df_binary, train_df_multiclass
+
+    all_df_multiclass.to_csv('csv_characterization/all_features_multiclass.csv', index=False)
+    all_df_binary.to_csv('csv_characterization/all_features_binary.csv', index=False)
+    return train_df_binary, train_df_multiclass, all_df_multiclass, all_df_binary
