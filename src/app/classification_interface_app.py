@@ -16,10 +16,16 @@ class ClassificationViewer(tk.Frame):
 
         self.table_frames = []
 
-        for title, table, accuracy in classifications:
+        # Caminhar por cada classificação
+        for title, table, accuracy, model_name in classifications:
             frame = ttk.Frame(self.scrollable_frame)
             frame.pack(side="top", fill="x", padx=10, pady=5)
 
+            # Mostrando nome do model
+            model_label = tk.Label(frame, text=f'Model: {model_name}')
+            model_label.pack(pady=5)
+
+            # Mostrando a tabela
             table_tree = ttk.Treeview(frame, columns=list(table.columns), show='headings')
             for col in table.columns:
                 table_tree.heading(col, text=col)
@@ -30,6 +36,7 @@ class ClassificationViewer(tk.Frame):
 
             table_tree.pack(expand=True, fill='both')
 
+            # Display accuracy
             accuracy_label = tk.Label(frame, text=f'Accuracy: {accuracy:.2%}')
             accuracy_label.pack(pady=5)
 

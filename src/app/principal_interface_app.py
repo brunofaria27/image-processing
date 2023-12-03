@@ -143,23 +143,23 @@ class Application:
         # Tratar a questão para saber se tem dados suficientes na imagem subida, senão testa com todos os dados
         try:
             table_binary, accuracy_binary = process_mahalanobis_binary(self.ids_segmented_images)
-            classifications.append(("Binary Classification Mahalanobis", table_binary, accuracy_binary))
+            classifications.append(("Binary Classification Mahalanobis", table_binary, accuracy_binary, "Binary Classification Mahalanobis"))
             table_multiclass, accuracy_multiclass = process_mahalanobis_multiclass(self.ids_segmented_images)
-            classifications.append(("Multiclass Classification Mahalanobis", table_multiclass, accuracy_multiclass))
+            classifications.append(("Multiclass Classification Mahalanobis", table_multiclass, accuracy_multiclass, "Multiclass Classification Mahalanobis"))
             table_binary_all, accuracy_binary_all = process_mahalanobis_binary_exception(self.ids_segmented_images)
-            classifications.append(("Binary Classification Mahalanobis - Todos os dados", table_binary_all, accuracy_binary_all))
+            classifications.append(("Binary Classification Mahalanobis - Todos os dados", table_binary_all, accuracy_binary_all, "Binary Classification Mahalanobis - Todos os dados"))
             table_multiclass_all, accuracy_multiclass_all = process_mahalanobis_multiclass_exception(self.ids_segmented_images)
-            classifications.append(("Multiclass Classification Mahalanobis - Todos os dados", table_multiclass_all, accuracy_multiclass_all))
+            classifications.append(("Multiclass Classification Mahalanobis - Todos os dados", table_multiclass_all, accuracy_multiclass_all, "Multiclass Classification Mahalanobis - Todos os dados"))
         except:
             table_binary, accuracy_binary = process_mahalanobis_binary_exception(self.ids_segmented_images)
-            classifications.append(("Binary Classification Mahalanobis - Todos os dados", table_binary, accuracy_binary))
+            classifications.append(("Binary Classification Mahalanobis - Todos os dados", table_binary, accuracy_binary, "Binary Classification Mahalanobis - Todos os dados"))
             table_multiclass, accuracy_multiclass = process_mahalanobis_multiclass_exception(self.ids_segmented_images)
-            classifications.append(("Multiclass Classification Mahalanobis - Todos os dados", table_multiclass, accuracy_multiclass))
+            classifications.append(("Multiclass Classification Mahalanobis - Todos os dados", table_multiclass, accuracy_multiclass, "Multiclass Classification Mahalanobis - Todos os dados"))
 
         table_binary_resnet = process_resnet_binary(self.cropped_images, self.ids_segmented_images)
-        classifications.append(("Binary Classification ResNet50", table_binary_resnet, 0))
+        classifications.append(("Binary Classification ResNet50", table_binary_resnet, 0, "Binary Classification ResNet50"))
         table_multiclass_resnet = process_resnet_multiclass(self.cropped_images, self.ids_segmented_images)
-        classifications.append(("Multiclass Classification ResNet50", table_multiclass_resnet, 0))
+        classifications.append(("Multiclass Classification ResNet50", table_multiclass_resnet, 0, "Multiclass Classification ResNet50"))
 
         process_mahalanobis_all_images() # Processar mahalanobis para todas as imagens
         display_classification_window(classifications)
