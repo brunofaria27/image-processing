@@ -71,7 +71,7 @@ test_generator = test_data_gen.flow_from_directory(
 
 custom_callback = CustomCallback(test_generator)  # Used for plot graphs
 start_time = time.time()
-model.fit(train_generator, epochs=100, callbacks=[custom_callback])
+model.fit(train_generator, epochs=200, callbacks=[custom_callback])
 end_time = time.time()
 
 execution_time = end_time - start_time

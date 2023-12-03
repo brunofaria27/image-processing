@@ -31,7 +31,7 @@ def classify_image_multiclass(model, image):
     return class_name, confidence
 
 def process_resnet_binary(segmented_images, ids):
-    model_path = 'train_codes/ai_models/my_model_binary_resnet.h5'
+    model_path = 'train_codes/ai_models/my_model_binary_resnet_200.h5'
     model = load_model(model_path)
     true_classes = search_true_classes(ids)
 
@@ -45,7 +45,7 @@ def process_resnet_binary(segmented_images, ids):
     return results_df
 
 def process_resnet_multiclass(segmented_images, ids):
-    model_path = 'train_codes/ai_models/my_model_multiclass_resnet.h5'
+    model_path = 'train_codes/ai_models/my_model_multiclass_resnet_200.h5'
     model = load_model(model_path)
     true_classes = search_true_classes(ids)
     
