@@ -1,3 +1,7 @@
+# Documentation Acess
+To access the documentation, simply [click here](). However, at the moment we only have the documentation in Portuguese in the form of an article. Nothing to add to the README.
+
+
 ## CRIC Cervix Cell Classification - [CSV Description](https://github.com/brunofaria27/image-processing/blob/main/src/data/classifications.csv)
 
 400 images from microscope slides of the uterine cervix using the conventional smear (Pap smear) and the epithelial cell abnormalities classified according to Bethesda system.
